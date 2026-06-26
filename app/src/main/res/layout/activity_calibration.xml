@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Calibration Layout: shows camera preview and calibration controls -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_dark"
+    android:padding="16dp">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/calibration_title"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Instructions -->
+    <TextView
+        android:id="@+id/tvCalibrationInstruction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/calibration_instruction"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:id="@+id/tvCalibrationHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/calibration_hint"
+        android:textColor="#AAAAAA"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Camera Preview -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/cameraPreview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Calibration Button -->
+    <Button
+        android:id="@+id/btnCalibrate"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="@string/btn_calibrate"
+        android:textSize="16sp"
+        android:backgroundTint="@color/accent_blue"
+        android:textColor="@color/white" />
+
+    <!-- Status Text -->
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="@color/red"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:minHeight="24dp" />
+
+</LinearLayout>

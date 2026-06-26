@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Face Distance Monitor</string>
+
+    <!-- Calibration screen -->
+    <string name="calibration_title">距离校准</string>
+    <string name="calibration_instruction">请将手机放在正常阅读距离（约30-40厘米），正对摄像头。</string>
+    <string name="calibration_hint">确保光线充足，面部清晰可见。</string>
+    <string name="btn_calibrate">点击校准</string>
+    <string name="calibrating">校准中…</string>
+    <string name="calibration_success">校准成功！基准距离已记录。</string>
+    <string name="calibration_failed">校准失败，请重试。</string>
+
+    <!-- Main screen -->
+    <string name="main_title">面部距离监控</string>
+    <string name="btn_start_monitor">开始监控</string>
+    <string name="btn_stop_monitor">停止监控</string>
+    <string name="btn_recalibrate">重新校准</string>
+    <string name="status_idle">未运行</string>
+    <string name="status_running">监控中</string>
+    <string name="status_alert">⚠️ 警告：距离过近！</string>
+    <string name="distance_info">估算距离: %d cm</string>
+    <string name="threshold_info">阈值: 30 cm</string>
+
+    <!-- Alert overlay -->
+    <string name="alert_overlay_title">请保持安全距离</string>
+    <string name="alert_overlay_subtitle">将手机远离面部至少30厘米</string>
+</resources>

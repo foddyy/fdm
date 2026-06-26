@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Alert Overlay: covers the entire screen with pulsing red border -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#00000000">
+
+    <!-- Top Red Bar -->
+    <View
+        android:id="@+id/alertTop"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/red"
+        android:alpha="0" />
+
+    <!-- Bottom Red Bar -->
+    <View
+        android:id="@+id/alertBottom"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom"
+        android:background="@color/red"
+        android:alpha="0" />
+
+    <!-- Left Red Bar -->
+    <View
+        android:id="@+id/alertLeft"
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        android:background="@color/red"
+        android:alpha="0" />
+
+    <!-- Right Red Bar -->
+    <View
+        android:id="@+id/alertRight"
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:background="@color/red"
+        android:alpha="0" />
+
+    <!-- Center Warning Text -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#CC000000"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚠️"
+            android:textSize="48sp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/alert_overlay_title"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/alert_overlay_subtitle"
+            android:textColor="#FFAAAA"
+            android:textSize="14sp"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+</FrameLayout>

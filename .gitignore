@@ -1,0 +1,31 @@
+# .gitignore for Android Project
+
+## Gradle
+/out/
+/local.properties/
+/.idea/
+.gradle/
+/build/
+
+# Generated file
+/bin/
+
+# Local configuration instance
+local.conf
+
+# Backup files
+*.bak
+*.cache
+*.diff
+*.patch
+
+# Keystore for releasing
+*.jks
+*.keystore
+
+# Gradle wrapper
+/gradle/wrapper/gradle-wrapper.jar
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Main Control Layout: show status, controls, and distance readout -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
+
+        <!-- App Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/main_title"
+            android:textColor="@color/white"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Status Indicator Circle -->
+        <View
+            android:id="@+id/viewStatusCircle"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/status_circle_idle"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Status Text -->
+        <TextView
+            android:id="@+id/tvStatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_idle"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Estimated Distance -->
+        <TextView
+            android:id="@+id/tvEstimatedDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/distance_info"
+            android:textColor="@color/accent_blue"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/threshold_info"
+            android:textColor="#AAAAAA"
+            android:textSize="14sp"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Action Buttons -->
+        <Button
+            android:id="@+id/btnStartMonitor"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="@string/btn_start_monitor"
+            android:textSize="16sp"
+            android:backgroundTint="@color/accent_blue"
+            android:textColor="@color/white"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnRecalibrate"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="@string/btn_recalibrate"
+            android:textSize="16sp"
+            android:backgroundTint="#FF6B35"
+            android:textColor="@color/white"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Info Text -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="该应用将持续使用前置摄像头监测\n面部与屏幕的距离\n当距离小于30cm时触发红色闪烁警示"
+            android:textColor="#777777"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
+</ScrollView>

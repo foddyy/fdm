@@ -27,21 +27,13 @@ jobs:
       - name: Download gradle-wrapper.jar
         run: |
           GRADLE_VERSION=$(grep 'distributionUrl' gradle/wrapper/gradle-wrapper.properties | sed 's/.*gradle-\(.*\)-bin.zip.*/\1/')
-          echo "Gradle version: $GRADLE_VERSION"
-          mkdir -p gradle-download
-          cd gradle-download
-          wget -q "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O gradle.zip
-          unzip -q gradle.zip
-          # Gradle wrapper jar location varies by version
-          if [ -f "gradle-${GRADLE_VERSION}/lib/plugins/gradle-wrapper-*.jar" ]; then
-            cp "gradle-${GRADLE_VERSION}/lib/plugins/gradle-wrapper-"*.jar ../gradle/wrapper/gradle-wrapper.jar
-          elif [ -f "gradle-${GRADLE_VERSION}/lib/gradle-wrapper.jar" ]; then
-            cp "gradle-${GRADLE_VERSION}/lib/gradle-wrapper.jar" ../gradle/wrapper/gradle-wrapper.jar
-          else
-            find gradle-${GRADLE_VERSION} -name "*wrapper*.jar" -exec cp {} ../gradle/wrapper/gradle-wrapper.jar \;
-          fi
-          echo "Copied wrapper jar:"
-          ls -la ../gradle/wrapper/gradle-wrapper.jar
+          echo "Downloading Gradle $GRADLE_VERSION..."
+          wget -q "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O /tmp/gradle.zip
+          unzip -q -o /tmp/gradle.zip -d /tmp/
+          echo "Searching for gradle-wrapper.jar..."
+          find /tmp/gradle-${GRADLE_VERSION} -name "gradle-wrapper-*.jar" -exec ls -la {} \;
+          cp /tmp/gradle-${GRADLE_VERSION}/lib/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar
+          ls -la gradle/wrapper/gradle-wrapper.jar
 
       - name: Build Debug APK
         run: |

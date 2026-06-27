@@ -23,9 +23,6 @@ local.conf
 *.jks
 *.keystore
 
-# Gradle wrapper
-/gradle/wrapper/gradle-wrapper.jar
-
 # OS
 .DS_Store
 Thumbs.db

@@ -24,21 +24,10 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Download gradle-wrapper.jar
-        run: |
-          GRADLE_VERSION=$(grep 'distributionUrl' gradle/wrapper/gradle-wrapper.properties | sed 's/.*gradle-\(.*\)-bin.zip.*/\1/')
-          echo "Downloading Gradle $GRADLE_VERSION..."
-          wget -q "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O /tmp/gradle.zip
-          unzip -q -o /tmp/gradle.zip -d /tmp/
-          echo "Searching for gradle-wrapper.jar..."
-          find /tmp/gradle-${GRADLE_VERSION} -name "gradle-wrapper-*.jar" -exec ls -la {} \;
-          cp /tmp/gradle-${GRADLE_VERSION}/lib/plugins/gradle-wrapper-${GRADLE_VERSION}.jar gradle/wrapper/gradle-wrapper.jar
-          ls -la gradle/wrapper/gradle-wrapper.jar
-
       - name: Build Debug APK
         run: |
           echo "=== Running build ==="
-          java -jar gradle/wrapper/gradle-wrapper.jar assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

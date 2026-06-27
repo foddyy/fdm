@@ -27,6 +27,14 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Download gradle-wrapper.jar
+        run: |
+          GRADLE_VERSION=$(grep 'distributionUrl' gradle/wrapper/gradle-wrapper.properties | sed 's/.*gradle-\(.*\)-bin.zip.*/\1/')
+          echo "Gradle version: $GRADLE_VERSION"
+          wget -q "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp/
+          cp /tmp/gradle-${GRADLE_VERSION}/lib/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar
+
       - name: Build Debug APK
         run: |
           echo "=== Running build with gradle wrapper jar ==="

@@ -32,7 +32,7 @@ jobs:
           unzip -q -o /tmp/gradle.zip -d /tmp/
           echo "Searching for gradle-wrapper.jar..."
           find /tmp/gradle-${GRADLE_VERSION} -name "gradle-wrapper-*.jar" -exec ls -la {} \;
-          cp /tmp/gradle-${GRADLE_VERSION}/lib/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar
+          cp /tmp/gradle-${GRADLE_VERSION}/lib/plugins/gradle-wrapper-${GRADLE_VERSION}.jar gradle/wrapper/gradle-wrapper.jar
           ls -la gradle/wrapper/gradle-wrapper.jar
 
       - name: Build Debug APK

@@ -29,10 +29,10 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          echo "=== Checking gradlew ==="
-          head -35 gradlew | tail -5
+          echo "=== Verifying gradlew ==="
+          cat gradlew | grep "DEFAULT_JVM_OPTS"
           echo "=== Running build ==="
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          bash ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

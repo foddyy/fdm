@@ -3,13 +3,11 @@ package com.example.facedistancemonitor
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.example.facedistancemonitor.databinding.ActivityCalibrationBinding
@@ -33,7 +31,8 @@ class CalibrationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_calibration)
+        binding = ActivityCalibrationBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
@@ -74,9 +73,7 @@ class CalibrationActivity : AppCompatActivity() {
             val selector = CameraSelector.DEFAULT_FRONT_FACING
             try {
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
-                    this, selector, previewUseCase!!, imageAnalysisUseCase!!
-                )
+                cameraProvider.bindToLifecycle(this, selector, previewUseCase!!, imageAnalysisUseCase!!)
             } catch (e: Exception) {
                 e.printStackTrace()
                 setStatusText("相机绑定失败: ${e.message}")
@@ -90,15 +87,13 @@ class CalibrationActivity : AppCompatActivity() {
             return
         }
 
-        val rotation = imageProxy.imageInfo.rotationDegrees
-        val inputImage = imageProxy.toImageProxyInputImage()
-
-        faceDetector?.recognizeFaces(inputImage)?.addOnSuccessListener { faces ->
+        faceDetector?.detectInImage(imageProxy)?.addOnSuccessListener { faceContainer ->
             runOnUiThread {
+                val faces = faceContainer.faces
                 if (faces.isNotEmpty()) {
                     val face = faces[0]
-                    val leftEye = face.getLandmark(Face.LEFT_EYE)
-                    val rightEye = face.getLandmark(Face.RIGHT_EYE)
+                    val leftEye = face.getLandmark(Face.LANDMARK_LEFT_EYE)
+                    val rightEye = face.getLandmark(Face.LANDMARK_RIGHT_EYE)
 
                     if (leftEye != null && rightEye != null) {
                         val leftPos = leftEye.position

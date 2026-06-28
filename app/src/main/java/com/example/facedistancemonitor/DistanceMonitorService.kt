@@ -152,31 +152,32 @@ class DistanceMonitorService : android.app.Service() {
             return
         }
 
-        val inputImage = imageProxy.toImageProxyInputImage()
+        faceDetector?.detectInImage(imageProxy)?.addOnSuccessListener { faceContainer ->
+            if (isMonitoring) {
+                val faces = faceContainer.faces
+                if (faces.isNotEmpty()) {
+                    val face = faces[0]
+                    val leftEye = face.getLandmark(Face.LANDMARK_LEFT_EYE)
+                    val rightEye = face.getLandmark(Face.LANDMARK_RIGHT_EYE)
 
-        faceDetector?.recognizeFaces(inputImage)?.addOnSuccessListener { faces ->
-            if (faces.isNotEmpty() && isMonitoring) {
-                val face = faces[0]
-                val leftEye = face.getLandmark(Face.LEFT_EYE)
-                val rightEye = face.getLandmark(Face.RIGHT_EYE)
+                    if (leftEye != null && rightEye != null) {
+                        val leftPos = leftEye.position
+                        val rightPos = rightEye.position
+                        val dx = rightPos.x - leftPos.x
+                        val dy = rightPos.y - leftPos.y
+                        val currentEyeDistancePx = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
 
-                if (leftEye != null && rightEye != null) {
-                    val leftPos = leftEye.position
-                    val rightPos = rightEye.position
-                    val dx = rightPos.x - leftPos.x
-                    val dy = rightPos.y - leftPos.y
-                    val currentEyeDistancePx = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+                        val estimatedDistanceCm = (NORMAL_READING_DISTANCE_CM.toFloat() *
+                            baselineEyeDistancePx / currentEyeDistancePx).toInt()
 
-                    val estimatedDistanceCm = (NORMAL_READING_DISTANCE_CM.toFloat() *
-                        baselineEyeDistancePx / currentEyeDistancePx).toInt()
-
-                    if (estimatedDistanceCm < THRESHOLD_DISTANCE_CM) {
-                        if (!isAlertActive) {
-                            startRedBlinkAlert()
-                        }
-                    } else {
-                        if (isAlertActive) {
-                            stopRedBlinkAlert()
+                        if (estimatedDistanceCm < THRESHOLD_DISTANCE_CM) {
+                            if (!isAlertActive) {
+                                startRedBlinkAlert()
+                            }
+                        } else {
+                            if (isAlertActive) {
+                                stopRedBlinkAlert()
+                            }
                         }
                     }
                 }

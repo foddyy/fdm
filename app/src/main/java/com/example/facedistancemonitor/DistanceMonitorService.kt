@@ -8,14 +8,20 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.view.View
 import android.view.WindowManager
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.NotificationCompat
+import com.google.mlkit.vision.face.Face
+import com.google.mlkit.vision.face.FaceDetection
+import com.google.mlkit.vision.face.FaceDetector
+import com.google.mlkit.vision.face.FaceDetectorOptions
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-/**
- * DistanceMonitorService - Foreground service that monitors face-to-screen distance
- * using CameraX + ML Kit face detection. Triggers red flashing overlay alert
- * when estimated distance < 30cm.
- */
 class DistanceMonitorService : android.app.Service() {
 
     companion object {
@@ -25,8 +31,8 @@ class DistanceMonitorService : android.app.Service() {
         const val NORMAL_READING_DISTANCE_CM = 35
     }
 
-    private var faceDetector: com.google.mlkit.vision.face.FaceDetector? = null
-    private var cameraExecutor: java.util.concurrent.ExecutorService? = null
+    private var faceDetector: FaceDetector? = null
+    private lateinit var cameraExecutor: ExecutorService
     private var isMonitoring = false
     private var baselineEyeDistancePx: Float = 0f
 
@@ -37,17 +43,16 @@ class DistanceMonitorService : android.app.Service() {
     override fun onCreate() {
         super.onCreate()
         setupFaceDetector()
-        cameraExecutor = java.util.concurrent.Executors.newFixedThreadPool(2)
+        cameraExecutor = Executors.newSingleThreadExecutor()
         startForegroundService()
     }
 
     private fun setupFaceDetector() {
-        val options = com.google.mlkit.vision.face.FaceDetectorOptions.Builder()
-            .setPerformanceMode(com.google.mlkit.vision.face.FaceDetectorOptions.PERFORMANCE_MODE_FAST)
-            .setLandmarkMode(com.google.mlkit.vision.face.FaceDetectorOptions.LANDMARK_MODE_ALL)
-            .setTrackingMode(com.google.mlkit.vision.face.FaceDetectorOptions.TRACKING_MODE_OFF)
+        val options = FaceDetectorOptions.Builder()
+            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+            .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
             .build()
-        faceDetector = com.google.mlkit.vision.face.FaceDetection.getClient(options)
+        faceDetector = FaceDetection.getClient(options)
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
     }
 
@@ -119,57 +124,50 @@ class DistanceMonitorService : android.app.Service() {
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
 
-            val preview = androidx.camera.core.Preview.Builder()
+            val preview = Preview.Builder()
                 .build()
 
-            val imageAnalysis = androidx.camera.core.ImageAnalysis.Builder()
-                .setBackpressureStrategy(androidx.camera.core.ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(androidx.camera.core.ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+            val imageAnalysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .build()
 
-            imageAnalysis.setAnalyzer(java.util.concurrent.Executors.newSingleThreadExecutor()) { imageProxy ->
+            imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
                 analyzeFrame(imageProxy)
             }
 
-            val selector = androidx.camera.core.CameraSelector.DEFAULT_FRONT_FACING
+            val selector = CameraSelector.DEFAULT_FRONT_FACING
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(this, selector, preview, imageAnalysis)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }, java.util.concurrent.Executors.newSingleThreadExecutor())
+        }, Executors.newSingleThreadExecutor())
     }
 
-    private fun analyzeFrame(imageProxy: androidx.camera.core.ImageAnalysis.ImageProxy) {
+    private fun analyzeFrame(imageProxy: ImageAnalysis.ImageProxy) {
         if (!isMonitoring || baselineEyeDistancePx <= 0) {
             imageProxy.close()
             return
         }
 
-        val rotation = imageProxy.imageInfo.rotationDegrees
-        val inputImage = androidx.camera.core.ImageProxy.toInputImage(imageProxy, rotation)
+        val inputImage = imageProxy.toImageProxyInputImage()
 
         faceDetector?.recognizeFaces(inputImage)?.addOnSuccessListener { faces ->
             if (faces.isNotEmpty() && isMonitoring) {
                 val face = faces[0]
-                val leftEye = face.getLandmark(
-                    com.google.mlkit.vision.face.landmark.Landmark.LEFT_EYE
-                )
-                val rightEye = face.getLandmark(
-                    com.google.mlkit.vision.face.landmark.Landmark.RIGHT_EYE
-                )
+                val leftEye = face.getLandmark(Face.LEFT_EYE)
+                val rightEye = face.getLandmark(Face.RIGHT_EYE)
 
                 if (leftEye != null && rightEye != null) {
                     val leftPos = leftEye.position
                     val rightPos = rightEye.position
-                    val currentEyeDistancePx = kotlin.math.sqrt(
-                        kotlin.math.pow(rightPos.x - leftPos.x, 2.0) +
-                        kotlin.math.pow(rightPos.y - leftPos.y, 2.0)
-                    ).toFloat()
+                    val dx = rightPos.x - leftPos.x
+                    val dy = rightPos.y - leftPos.y
+                    val currentEyeDistancePx = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
 
-                    // Closer face = larger eye distance in pixels
-                    val estimatedDistanceCm = (NORMAL_READING_DISTANCE_CM *
+                    val estimatedDistanceCm = (NORMAL_READING_DISTANCE_CM.toFloat() *
                         baselineEyeDistancePx / currentEyeDistancePx).toInt()
 
                     if (estimatedDistanceCm < THRESHOLD_DISTANCE_CM) {
@@ -226,7 +224,7 @@ class DistanceMonitorService : android.app.Service() {
     override fun onDestroy() {
         super.onDestroy()
         stopMonitoring()
-        cameraExecutor?.shutdown()
+        cameraExecutor.shutdown()
         faceDetector?.close()
     }
 

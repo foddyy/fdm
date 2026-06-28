@@ -12,13 +12,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.databinding.DataBindingUtil
 import com.example.facedistancemonitor.databinding.ActivityMainBinding
 
-/**
- * MainActivity - Main control panel for the Face Distance Monitor app.
- * Handles permissions, calibration navigation, and service start/stop.
- */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -53,14 +48,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Check if calibrated
         val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .contains("baseline_eye_distance_px")
 
         if (!isCalibrated) {
-            // Redirect to calibration
             startActivity(Intent(this, CalibrationActivity::class.java))
         }
 
@@ -68,24 +62,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // Check if we have all required permissions
         if (!hasAllPermissions()) {
             requestPermissions()
         }
 
-        // Check overlay permission for alert display
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
                 // Will request when user tries to start monitoring
             }
         }
 
-        // Start monitoring button
         binding.btnStartMonitor.setOnClickListener {
             startMonitoring()
         }
 
-        // Recalibrate button
         binding.btnRecalibrate.setOnClickListener {
             startActivity(Intent(this, CalibrationActivity::class.java))
         }
@@ -95,38 +85,37 @@ class MainActivity : AppCompatActivity() {
         val permissions = mutableListOf(
             Manifest.permission.CAMERA,
         )
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.POST_NOTIFICATIONS)
         }
-        
-        return permissions.all { 
-            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED 
+
+        return permissions.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }
     }
 
     private fun requestPermissions() {
         val permissions = mutableListOf<String>()
-        
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) 
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
             != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.CAMERA)
         }
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) 
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
-        
+
         if (permissions.isNotEmpty()) {
             permissionLauncher.launch(permissions.toTypedArray())
         }
     }
 
     private fun startMonitoring() {
-        // Check overlay permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
                 val intent = Intent(
@@ -138,7 +127,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Start the foreground service
         val intent = Intent(this, DistanceMonitorService::class.java).apply {
             action = "ACTION_START_MONITORING"
         }
@@ -149,7 +137,6 @@ class MainActivity : AppCompatActivity() {
             startService(intent)
         }
 
-        // Update UI
         binding.tvStatusText.text = getString(R.string.status_running)
         binding.viewStatusCircle.background = ContextCompat.getDrawable(
             this, R.drawable.status_circle_running
@@ -166,7 +153,6 @@ class MainActivity : AppCompatActivity() {
         }
         startService(intent)
 
-        // Reset UI
         binding.tvStatusText.text = getString(R.string.status_idle)
         binding.viewStatusCircle.background = ContextCompat.getDrawable(
             this, R.drawable.status_circle_idle

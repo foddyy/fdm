@@ -3,30 +3,29 @@ package com.example.facedistancemonitor
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import com.example.facedistancemonitor.databinding.ActivityCalibrationBinding
+import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetector
 import com.google.mlkit.vision.face.FaceDetectorOptions
-import com.google.mlkit.vision.face.landmark.Landmark
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-/**
- * CalibrationActivity - Calibration screen that uses CameraX + ML Kit face detection
- * to measure the eye-to-eye pixel distance as a baseline for distance estimation.
- */
 class CalibrationActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCalibrationBinding
     private lateinit var cameraExecutor: ExecutorService
     private var faceDetector: FaceDetector? = null
-    private var previewUseCase: androidx.camera.core.Preview? = null
+    private var previewUseCase: Preview? = null
     private var imageAnalysisUseCase: ImageAnalysis? = null
 
     private var baselineEyeDistancePx: Float = 0f
@@ -38,7 +37,6 @@ class CalibrationActivity : AppCompatActivity() {
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
-        // ML Kit face detector with landmarks (for eye positions)
         val options = FaceDetectorOptions.Builder()
             .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
             .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
@@ -59,13 +57,11 @@ class CalibrationActivity : AppCompatActivity() {
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
 
-            // Preview
-            previewUseCase = androidx.camera.core.Preview.Builder()
+            previewUseCase = Preview.Builder()
                 .build().also {
                     it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
                 }
 
-            // Image analysis for face detection
             imageAnalysisUseCase = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
@@ -95,22 +91,21 @@ class CalibrationActivity : AppCompatActivity() {
         }
 
         val rotation = imageProxy.imageInfo.rotationDegrees
-        val inputImage = androidx.camera.core.ImageProxy.toInputImage(imageProxy, rotation)
+        val inputImage = imageProxy.toImageProxyInputImage()
 
         faceDetector?.recognizeFaces(inputImage)?.addOnSuccessListener { faces ->
             runOnUiThread {
                 if (faces.isNotEmpty()) {
                     val face = faces[0]
-                    val leftEye = face.getLandmark(Landmark.LEFT_EYE)
-                    val rightEye = face.getLandmark(Landmark.RIGHT_EYE)
+                    val leftEye = face.getLandmark(Face.LEFT_EYE)
+                    val rightEye = face.getLandmark(Face.RIGHT_EYE)
 
                     if (leftEye != null && rightEye != null) {
                         val leftPos = leftEye.position
                         val rightPos = rightEye.position
-                        val eyeDistancePx = kotlin.math.sqrt(
-                            kotlin.math.pow(rightPos.x - leftPos.x, 2.0) +
-                            kotlin.math.pow(rightPos.y - leftPos.y, 2.0)
-                        ).toFloat()
+                        val dx = rightPos.x - leftPos.x
+                        val dy = rightPos.y - leftPos.y
+                        val eyeDistancePx = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
 
                         baselineEyeDistancePx += eyeDistancePx
                         calibrationCount++

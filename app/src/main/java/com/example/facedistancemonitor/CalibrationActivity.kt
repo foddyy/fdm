@@ -8,14 +8,14 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.core.ImageProxy
 import androidx.core.content.ContextCompat
 import com.example.facedistancemonitor.databinding.ActivityCalibrationBinding
+import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetector
 import com.google.mlkit.vision.face.FaceDetectorOptions
-import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.face.FaceLandmark
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -95,8 +95,8 @@ class CalibrationActivity : AppCompatActivity() {
             runOnUiThread {
                 if (faces.isNotEmpty()) {
                     val face = faces[0]
-                    val leftEye = face.getLandmark(Face.LANDMARK_LEFT_EYE)
-                    val rightEye = face.getLandmark(Face.LANDMARK_RIGHT_EYE)
+                    val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)
+                    val rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE)
 
                     if (leftEye != null && rightEye != null) {
                         val leftPos = leftEye.position

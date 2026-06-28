@@ -19,6 +19,7 @@ import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetector
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -152,9 +153,11 @@ class DistanceMonitorService : android.app.Service() {
             return
         }
 
-        faceDetector?.detectInImage(imageProxy)?.addOnSuccessListener { faceContainer ->
+        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+        val inputImage = InputImage.fromMediaImage(imageProxy.image, rotationDegrees)
+
+        faceDetector?.detectInImage(inputImage)?.addOnSuccessListener { faces ->
             if (isMonitoring) {
-                val faces = faceContainer.faces
                 if (faces.isNotEmpty()) {
                     val face = faces[0]
                     val leftEye = face.getLandmark(Face.LANDMARK_LEFT_EYE)

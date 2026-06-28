@@ -8,8 +8,8 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
-import androidx.databinding.DataBindingUtil
 import com.example.facedistancemonitor.databinding.ActivityCalibrationBinding
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection

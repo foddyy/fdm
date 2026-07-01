@@ -12,6 +12,9 @@
     <!-- Wake lock to keep CPU alive in background -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Overlay permission for alert display -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <!-- Notification permission (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -32,6 +35,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Calibration Activity -->
+        <activity
+            android:name=".CalibrationActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
         <!-- Foreground Service for background monitoring -->
         <service

@@ -1,6 +1,5 @@
 package com.example.facedistancemonitor
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -8,15 +7,15 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
-import android.view.View
 import android.view.WindowManager
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.LifecycleService
 import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetector
 import com.google.mlkit.vision.face.FaceDetectorOptions
@@ -24,7 +23,7 @@ import com.google.mlkit.vision.face.FaceLandmark
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class DistanceMonitorService : android.app.Service() {
+class DistanceMonitorService : LifecycleService() {
 
     companion object {
         const val CHANNEL_ID = "DistanceMonitorChannel"
@@ -46,6 +45,7 @@ class DistanceMonitorService : android.app.Service() {
         super.onCreate()
         setupFaceDetector()
         cameraExecutor = Executors.newSingleThreadExecutor()
+        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         startForegroundService()
     }
 
@@ -55,7 +55,6 @@ class DistanceMonitorService : android.app.Service() {
             .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
             .build()
         faceDetector = FaceDetection.getClient(options)
-        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
     }
 
     private fun startForegroundService() {
@@ -100,6 +99,7 @@ class DistanceMonitorService : android.app.Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
         when (intent?.action) {
             "ACTION_START_MONITORING" -> {
                 baselineEyeDistancePx = getSharedPreferences("app_prefs", MODE_PRIVATE)
@@ -126,19 +126,17 @@ class DistanceMonitorService : android.app.Service() {
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
 
-            val preview = Preview.Builder()
-                .build()
+            val preview = Preview.Builder().build()
 
             val imageAnalysis = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .build()
 
-            imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
+            imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
                 analyzeFrame(imageProxy)
             }
 
-            val selector = CameraSelector.DEFAULT_FRONT_FACING
+            val selector = CameraSelector.DEFAULT_FRONT_CAMERA
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(this, selector, preview, imageAnalysis)
@@ -148,18 +146,24 @@ class DistanceMonitorService : android.app.Service() {
         }, Executors.newSingleThreadExecutor())
     }
 
-    private fun analyzeFrame(imageProxy: ImageAnalysis.ImageProxy) {
+    private fun analyzeFrame(imageProxy: ImageProxy) {
         if (!isMonitoring || baselineEyeDistancePx <= 0) {
             imageProxy.close()
             return
         }
 
-        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-        val inputImage = InputImage.fromMediaImage(imageProxy.image, rotationDegrees)
+        val mediaImage = imageProxy.image
+        if (mediaImage == null) {
+            imageProxy.close()
+            return
+        }
 
-        faceDetector?.detectInImage(inputImage)?.addOnSuccessListener { faces ->
-            if (isMonitoring) {
-                if (faces.isNotEmpty()) {
+        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+        val inputImage = InputImage.fromMediaImage(mediaImage, rotationDegrees)
+
+        faceDetector?.process(inputImage)
+            ?.addOnSuccessListener { faces ->
+                if (isMonitoring && faces.isNotEmpty()) {
                     val face = faces[0]
                     val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)
                     val rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE)
@@ -186,9 +190,12 @@ class DistanceMonitorService : android.app.Service() {
                     }
                 }
             }
-        }
-
-        imageProxy.close()
+            ?.addOnFailureListener { e ->
+                e.printStackTrace()
+            }
+            ?.addOnCompleteListener {
+                imageProxy.close()
+            }
     }
 
     private fun startRedBlinkAlert() {
@@ -201,6 +208,7 @@ class DistanceMonitorService : android.app.Service() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
             } else {
+                @Suppress("DEPRECATION")
                 WindowManager.LayoutParams.TYPE_PHONE
             },
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
@@ -233,5 +241,8 @@ class DistanceMonitorService : android.app.Service() {
         faceDetector?.close()
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    override fun onBind(intent: Intent): IBinder? {
+        super.onBind(intent)
+        return null
+    }
 }

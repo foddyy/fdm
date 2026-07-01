@@ -6,12 +6,12 @@ import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import com.example.facedistancemonitor.databinding.ActivityCalibrationBinding
 import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetector
 import com.google.mlkit.vision.face.FaceDetectorOptions
@@ -24,8 +24,6 @@ class CalibrationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCalibrationBinding
     private lateinit var cameraExecutor: ExecutorService
     private var faceDetector: FaceDetector? = null
-    private var previewUseCase: Preview? = null
-    private var imageAnalysisUseCase: ImageAnalysis? = null
 
     private var baselineEyeDistancePx: Float = 0f
     private var calibrationCount: Int = 0
@@ -57,24 +55,22 @@ class CalibrationActivity : AppCompatActivity() {
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
 
-            previewUseCase = Preview.Builder()
-                .build().also {
-                    it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
-                }
+            val preview = Preview.Builder().build().also {
+                it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
+            }
 
-            imageAnalysisUseCase = ImageAnalysis.Builder()
+            val imageAnalysis = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .build()
 
-            imageAnalysisUseCase?.setAnalyzer(cameraExecutor) { imageProxy ->
+            imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
                 processImageProxy(imageProxy)
             }
 
-            val selector = CameraSelector.DEFAULT_FRONT_FACING
+            val selector = CameraSelector.DEFAULT_FRONT_CAMERA
             try {
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, selector, previewUseCase!!, imageAnalysisUseCase!!)
+                cameraProvider.bindToLifecycle(this, selector, preview, imageAnalysis)
             } catch (e: Exception) {
                 e.printStackTrace()
                 setStatusText("相机绑定失败: ${e.message}")
@@ -82,45 +78,49 @@ class CalibrationActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    private fun processImageProxy(imageProxy: ImageAnalysis.ImageProxy) {
-        if (imageProxy.image == null) {
+    private fun processImageProxy(imageProxy: ImageProxy) {
+        val mediaImage = imageProxy.image
+        if (mediaImage == null) {
             imageProxy.close()
             return
         }
 
         val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-        val inputImage = InputImage.fromMediaImage(imageProxy.image, rotationDegrees)
+        val inputImage = InputImage.fromMediaImage(mediaImage, rotationDegrees)
 
-        faceDetector?.detectInImage(inputImage)?.addOnSuccessListener { faces ->
-            runOnUiThread {
-                if (faces.isNotEmpty()) {
-                    val face = faces[0]
-                    val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)
-                    val rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE)
+        faceDetector?.process(inputImage)
+            ?.addOnSuccessListener { faces ->
+                runOnUiThread {
+                    if (faces.isNotEmpty()) {
+                        val face = faces[0]
+                        val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)
+                        val rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE)
 
-                    if (leftEye != null && rightEye != null) {
-                        val leftPos = leftEye.position
-                        val rightPos = rightEye.position
-                        val dx = rightPos.x - leftPos.x
-                        val dy = rightPos.y - leftPos.y
-                        val eyeDistancePx = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+                        if (leftEye != null && rightEye != null) {
+                            val leftPos = leftEye.position
+                            val rightPos = rightEye.position
+                            val dx = rightPos.x - leftPos.x
+                            val dy = rightPos.y - leftPos.y
+                            val eyeDistancePx = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
 
-                        baselineEyeDistancePx += eyeDistancePx
-                        calibrationCount++
+                            baselineEyeDistancePx += eyeDistancePx
+                            calibrationCount++
 
-                        setStatusText("检测到双眼间距: ${eyeDistancePx.toInt()} px  (已采集 $calibrationCount 帧)")
+                            setStatusText("双眼间距: ${eyeDistancePx.toInt()} px (已采集 $calibrationCount 帧)")
+                        } else {
+                            setStatusText("未检测到眼部关键点")
+                        }
                     } else {
-                        setStatusText("未检测到眼部关键点")
+                        setStatusText("未检测到人脸，请对准摄像头")
                     }
-                } else {
-                    setStatusText("未检测到人脸，请对准摄像头")
                 }
             }
-        }.addOnFailureListener { e ->
-            e.printStackTrace()
-        }
-
-        imageProxy.close()
+            ?.addOnFailureListener { e ->
+                e.printStackTrace()
+            }
+            ?.addOnCompleteListener {
+                imageProxy.close()
+            }
     }
 
     private fun startCalibration() {
@@ -132,8 +132,8 @@ class CalibrationActivity : AppCompatActivity() {
         Handler(Looper.getMainLooper()).postDelayed({
             if (calibrationCount > 10) {
                 val avgDistance = baselineEyeDistancePx / calibrationCount
-                val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-                prefs.edit()
+                getSharedPreferences("app_prefs", MODE_PRIVATE)
+                    .edit()
                     .putFloat("baseline_eye_distance_px", avgDistance)
                     .apply()
 

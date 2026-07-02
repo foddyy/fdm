@@ -1,13 +1,13 @@
 package com.example.facedistancemonitor
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
-import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +17,10 @@ import com.example.facedistancemonitor.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var distanceDataStore: DistanceDataStore
+    private lateinit var distanceUpdateHandler: Handler
+    private val DISTANCE_UPDATE_INTERVAL = 500L
+    private var distanceUpdateRunnable: Runnable? = null
 
     companion object {
         const val REQUEST_CODE_PERMISSIONS = 100
@@ -51,6 +55,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        distanceDataStore = DistanceDataStore(this)
+        distanceUpdateHandler = Handler(Looper.getMainLooper())
+        
         val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .contains("baseline_eye_distance_px")
 
@@ -59,6 +66,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupUI()
+        startDistanceUpdates()
     }
 
     private fun setupUI() {
@@ -160,6 +168,31 @@ class MainActivity : AppCompatActivity() {
         binding.btnStartMonitor.text = getString(R.string.btn_start_monitor)
         binding.btnStartMonitor.setOnClickListener {
             startMonitoring()
+        }
+        
+        // Stop distance updates
+        distanceUpdateRunnable?.let { 
+            distanceUpdateHandler.removeCallbacks(it)
+        }
+    }
+    
+    private fun startDistanceUpdates() {
+        distanceUpdateRunnable = object : Runnable {
+            override fun run() {
+                val distance = distanceDataStore.getDistance()
+                if (distance >= 0) {
+                    binding.tvEstimatedDistance.text = getString(R.string.distance_info, distance)
+                }
+                distanceUpdateHandler.postDelayed(this, DISTANCE_UPDATE_INTERVAL)
+            }
+        }
+        distanceUpdateHandler.post(distanceUpdateRunnable)
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        distanceUpdateRunnable?.let { 
+            distanceUpdateHandler.removeCallbacks(it)
         }
     }
 }

@@ -22,6 +22,8 @@ import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.google.mlkit.vision.face.FaceLandmark
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import android.os.Handler
+import android.os.Looper
 
 class DistanceMonitorService : LifecycleService() {
 
@@ -40,9 +42,13 @@ class DistanceMonitorService : LifecycleService() {
     private var alertView: ViewAlertOverlay? = null
     private var isAlertActive = false
     private var windowManager: WindowManager? = null
+    
+    private lateinit var distanceDataStore: DistanceDataStore
+    private var lastReportedDistance: Int = -1
 
     override fun onCreate() {
         super.onCreate()
+        distanceDataStore = DistanceDataStore(this)
         setupFaceDetector()
         cameraExecutor = Executors.newSingleThreadExecutor()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
@@ -177,6 +183,12 @@ class DistanceMonitorService : LifecycleService() {
 
                         val estimatedDistanceCm = (NORMAL_READING_DISTANCE_CM.toFloat() *
                             baselineEyeDistancePx / currentEyeDistancePx).toInt()
+
+                        // Save to shared data store for UI update
+                        if (estimatedDistanceCm != lastReportedDistance) {
+                            distanceDataStore.saveDistance(estimatedDistanceCm)
+                            lastReportedDistance = estimatedDistanceCm
+                        }
 
                         if (estimatedDistanceCm < THRESHOLD_DISTANCE_CM) {
                             if (!isAlertActive) {

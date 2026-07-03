@@ -32,6 +32,10 @@ class DistanceMonitorService : LifecycleService() {
         const val NOTIFICATION_ID = 1001
         const val THRESHOLD_DISTANCE_CM = 30
         const val NORMAL_READING_DISTANCE_CM = 35
+        // 降频：相机每秒最多处理1帧
+        const val FRAME_INTERVAL_MS = 1000L
+        // 连续检测到过近才报警（避免偶发误报）
+        const val CONSECUTIVE_NEAR_COUNT = 2
     }
 
     private var faceDetector: FaceDetector? = null
@@ -45,6 +49,12 @@ class DistanceMonitorService : LifecycleService() {
     
     private lateinit var distanceDataStore: DistanceDataStore
     private var lastReportedDistance: Int = -1
+    
+    // 降频控制：记录上次处理帧的时间戳
+    private var lastFrameTimeMs = 0L
+    
+    // 连续过近计数
+    private var consecutiveNearCount = 0
 
     override fun onCreate() {
         super.onCreate()
@@ -113,8 +123,15 @@ class DistanceMonitorService : LifecycleService() {
 
                 if (baselineEyeDistancePx > 0) {
                     isMonitoring = true
+                    // 调试Toast：确认Service已启动
+                    Handler(Looper.getMainLooper()).post {
+                        Toast.makeText(this, "监控已启动，基线=${baselineEyeDistancePx.toInt()}px", Toast.LENGTH_LONG).show()
+                    }
                     startCameraMonitoring()
                 } else {
+                    Handler(Looper.getMainLooper()).post {
+                        Toast.makeText(this, "校准数据为空，请先校准", Toast.LENGTH_LONG).show()
+                    }
                     stopSelf()
                 }
             }
@@ -158,6 +175,14 @@ class DistanceMonitorService : LifecycleService() {
             return
         }
 
+        // 降频：每秒最多处理1帧
+        val now = System.currentTimeMillis()
+        if (now - lastFrameTimeMs < FRAME_INTERVAL_MS) {
+            imageProxy.close()
+            return
+        }
+        lastFrameTimeMs = now
+
         val mediaImage = imageProxy.image
         if (mediaImage == null) {
             imageProxy.close()
@@ -184,20 +209,31 @@ class DistanceMonitorService : LifecycleService() {
                         val estimatedDistanceCm = (NORMAL_READING_DISTANCE_CM.toFloat() *
                             baselineEyeDistancePx / currentEyeDistancePx).toInt()
 
-                        // Save to shared data store for UI update
-                        if (estimatedDistanceCm != lastReportedDistance) {
-                            distanceDataStore.saveDistance(estimatedDistanceCm)
-                            lastReportedDistance = estimatedDistanceCm
+                        // 首次检测到人脸时提示
+                        if (lastReportedDistance < 0) {
+                            Handler(Looper.getMainLooper()).post {
+                                Toast.makeText(this, "检测到人脸，双眼间距=${currentEyeDistancePx.toInt()}px，距离=${estimatedDistanceCm}cm", Toast.LENGTH_LONG).show()
+                            }
                         }
 
-                        if (estimatedDistanceCm < THRESHOLD_DISTANCE_CM) {
-                            if (!isAlertActive) {
-                                startRedBlinkAlert()
-                            }
+                        // 调试日志：在手机上弹出Toast显示检测信息
+                        val isNear = estimatedDistanceCm < THRESHOLD_DISTANCE_CM
+                        if (isNear) {
+                            consecutiveNearCount++
                         } else {
-                            if (isAlertActive) {
-                                stopRedBlinkAlert()
-                            }
+                            consecutiveNearCount = 0
+                        }
+
+                        // 保存距离数据供UI更新
+                        distanceDataStore.saveDistance(estimatedDistanceCm)
+                        lastReportedDistance = estimatedDistanceCm
+
+                        // 连续两次过近才报警
+                        if (isNear && consecutiveNearCount >= CONSECUTIVE_NEAR_COUNT && !isAlertActive) {
+                            startRedBlinkAlert()
+                        } else if (!isNear && isAlertActive && consecutiveNearCount == 0) {
+                            // 连续两次正常才取消报警
+                            stopRedBlinkAlert()
                         }
                     }
                 }
@@ -243,6 +279,8 @@ class DistanceMonitorService : LifecycleService() {
 
     private fun stopMonitoring() {
         isMonitoring = false
+        consecutiveNearCount = 0
+        lastFrameTimeMs = 0
         stopRedBlinkAlert()
     }
 

@@ -177,7 +177,7 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun startDistanceUpdates() {
-        distanceUpdateRunnable = object : Runnable {
+        val runnable = object : Runnable {
             override fun run() {
                 val distance = distanceDataStore.getDistance()
                 if (distance >= 0) {
@@ -186,7 +186,8 @@ class MainActivity : AppCompatActivity() {
                 distanceUpdateHandler.postDelayed(this, DISTANCE_UPDATE_INTERVAL)
             }
         }
-        distanceUpdateHandler.post(distanceUpdateRunnable)
+        distanceUpdateRunnable = runnable
+        distanceUpdateHandler.post(runnable)
     }
     
     override fun onDestroy() {

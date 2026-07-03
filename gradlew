@@ -43,23 +43,23 @@ fi
 # Determine the script directory.
 PRG="$0"
 while [ -h "$PRG" ] ; do
-    ls=`ls -ld "$PRG"`
-    link=`expr "$ls" : '.*-> \(.*\)$'`
+    ls=$(ls -ld "$PRG")
+    link=$(expr "$ls" : '.*-> \(.*\)$')
     if expr "$link" : '/.*' > /dev/null 2>&1 ; then
         PRG="$link"
     else
-        PRG=`dirname "$PRG"`/"$link"
+        PRG=$(dirname "$PRG")/"$link"
     fi
 done
 
 # Get the parent directory of this script
-SCRIPT_DIR=`cd "`dirname "$PRG"`" > /dev/null && pwd`
+SCRIPT_DIR=$(cd "$(dirname "$PRG")" > /dev/null && pwd)
 
 # Change to the project directory.
-cd "`dirname "$PRG"`" > /dev/null
+cd "$(dirname "$PRG")" > /dev/null
 
 # Resolve links: $0 may be a link
-PRGDIR=`dirname "$PRG"`
+PRGDIR=$(dirname "$PRG")
 
 # Start Gradle
 exec "$JAVACMD" \

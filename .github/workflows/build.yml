@@ -32,7 +32,8 @@ jobs:
       - name: Build Debug APK
         run: |
           echo "=== Running build ==="
-          java -jar gradle/wrapper/gradle-wrapper.jar assembleDebug --no-daemon --stacktrace
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

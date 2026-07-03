@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var distanceUpdateHandler: Handler
     private val DISTANCE_UPDATE_INTERVAL = 500L
     private var distanceUpdateRunnable: Runnable? = null
+    private var serviceRunning = false
 
     companion object {
         const val REQUEST_CODE_PERMISSIONS = 100
@@ -150,6 +151,7 @@ class MainActivity : AppCompatActivity() {
             this, R.drawable.status_circle_running
         )
         binding.btnStartMonitor.text = getString(R.string.btn_stop_monitor)
+        serviceRunning = true
         binding.btnStartMonitor.setOnClickListener {
             stopMonitoring()
         }
@@ -166,6 +168,7 @@ class MainActivity : AppCompatActivity() {
             this, R.drawable.status_circle_idle
         )
         binding.btnStartMonitor.text = getString(R.string.btn_start_monitor)
+        serviceRunning = false
         binding.btnStartMonitor.setOnClickListener {
             startMonitoring()
         }
@@ -182,6 +185,18 @@ class MainActivity : AppCompatActivity() {
                 val distance = distanceDataStore.getDistance()
                 if (distance >= 0) {
                     binding.tvEstimatedDistance.text = getString(R.string.distance_info, distance)
+                    if (serviceRunning) {
+                        binding.tvDebugInfo.text = "调试: 服务运行中, 距离=$distance cm"
+                    } else {
+                        binding.tvDebugInfo.text = "调试: 未检测到人脸"
+                    }
+                } else {
+                    binding.tvEstimatedDistance.text = "等待检测..."
+                    if (serviceRunning) {
+                        binding.tvDebugInfo.text = "调试: 服务运行中, 但无距离数据"
+                    } else {
+                        binding.tvDebugInfo.text = "调试: 请先校准并点击开始监控"
+                    }
                 }
                 distanceUpdateHandler.postDelayed(this, DISTANCE_UPDATE_INTERVAL)
             }

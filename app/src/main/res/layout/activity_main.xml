@@ -58,7 +58,17 @@
             android:text="@string/threshold_info"
             android:textColor="#AAAAAA"
             android:textSize="14sp"
-            android:layout_marginBottom="32dp" />
+            android:layout_marginBottom="4dp" />
+
+        <!-- Debug info -->
+        <TextView
+            android:id="@+id/tvDebugInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="调试: 无"
+            android:textColor="#666666"
+            android:textSize="11sp"
+            android:layout_marginBottom="24dp" />
 
         <!-- Action Buttons -->
         <Button

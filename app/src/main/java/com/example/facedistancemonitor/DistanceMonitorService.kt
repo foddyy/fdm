@@ -142,26 +142,29 @@ class DistanceMonitorService : LifecycleService() {
     }
 
     private fun startCameraMonitoring() {
-        try {
-            val cameraProvider = ProcessCameraProvider.getInstance(applicationContext).get()
-            
-            val imageAnalysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
+        // ProcessCameraProvider.getInstance 必须在主线程调用
+        Handler(Looper.getMainLooper()).post {
+            try {
+                val cameraProvider = ProcessCameraProvider.getInstance(applicationContext).get()
+                
+                val imageAnalysis = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
 
-            imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
-                analyzeFrame(imageProxy)
+                imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
+                    analyzeFrame(imageProxy)
+                }
+
+                val selector = CameraSelector.DEFAULT_FRONT_CAMERA
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(applicationContext as LifecycleOwner, selector, imageAnalysis)
+                
+                distanceDataStore.markCameraReady()
+            } catch (e: Exception) {
+                val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
+                distanceDataStore.markCameraError(errorMsg)
+                android.util.Log.e("DistanceMonitorService", "Camera init failed: $errorMsg", e)
             }
-
-            val selector = CameraSelector.DEFAULT_FRONT_CAMERA
-            cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(applicationContext as LifecycleOwner, selector, imageAnalysis)
-            
-            distanceDataStore.markCameraReady()
-        } catch (e: Exception) {
-            val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
-            distanceDataStore.markCameraError(errorMsg)
-            android.util.Log.e("DistanceMonitorService", "Camera init failed: $errorMsg", e)
         }
     }
 

@@ -157,7 +157,7 @@ class DistanceMonitorService : LifecycleService() {
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
                 cameraProvider.unbindAll()
-                cameraProvider.bind(this, selector, imageAnalysis)
+                cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
                 
                 distanceDataStore.markCameraReady()
             } catch (e: Exception) {

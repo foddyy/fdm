@@ -147,8 +147,6 @@ class DistanceMonitorService : LifecycleService() {
             try {
                 val cameraProvider = cameraProviderFuture.get()
 
-                val preview = Preview.Builder().build()
-
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
@@ -159,17 +157,23 @@ class DistanceMonitorService : LifecycleService() {
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, selector, preview, imageAnalysis)
+                // 使用 bind 而不是 bindToLifecycle，因为 Service 的生命周期管理不如 Activity 稳定
+                cameraProvider.bind(selector, imageAnalysis)
                 
-                // 相机绑定成功，通知MainActivity
+                // 相机绑定成功
                 Handler(Looper.getMainLooper()).post {
                     distanceDataStore.markCameraReady()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                // 相机绑定失败，标记错误
+                // 相机绑定失败，记录错误信息
+                val errorMsg = try {
+                    e.message ?: e.javaClass.simpleName
+                } catch (ex: Exception) {
+                    "bind failed"
+                }
                 Handler(Looper.getMainLooper()).post {
-                    distanceDataStore.markCameraError(e.message ?: "unknown")
+                    distanceDataStore.markCameraError(errorMsg)
                 }
             }
         }, Executors.newSingleThreadExecutor())

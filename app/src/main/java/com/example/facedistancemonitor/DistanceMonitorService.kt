@@ -13,6 +13,7 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.lifecycle.LifecycleOwner
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import com.google.mlkit.vision.common.InputImage
@@ -141,33 +142,26 @@ class DistanceMonitorService : LifecycleService() {
     }
 
     private fun startCameraMonitoring() {
-        // 使用主线程执行相机初始化，避免异步回调中的生命周期问题
-        Handler(Looper.getMainLooper()).post {
-            try {
-                val cameraProvider = ProcessCameraProvider.getInstance(this).get()
-                
-                val imageAnalysis = ImageAnalysis.Builder()
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .build()
+        try {
+            val cameraProvider = ProcessCameraProvider.getInstance(applicationContext).get()
+            
+            val imageAnalysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
 
-                imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
-                    analyzeFrame(imageProxy)
-                }
-
-                val selector = CameraSelector.DEFAULT_FRONT_CAMERA
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this@DistanceMonitorService, selector, imageAnalysis)
-                
-                Handler(Looper.getMainLooper()).post {
-                    distanceDataStore.markCameraReady()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
-                Handler(Looper.getMainLooper()).post {
-                    distanceDataStore.markCameraError(errorMsg)
-                }
+            imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
+                analyzeFrame(imageProxy)
             }
+
+            val selector = CameraSelector.DEFAULT_FRONT_CAMERA
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(applicationContext as LifecycleOwner, selector, imageAnalysis)
+            
+            distanceDataStore.markCameraReady()
+        } catch (e: Exception) {
+            val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
+            distanceDataStore.markCameraError(errorMsg)
+            android.util.Log.e("DistanceMonitorService", "Camera init failed: $errorMsg", e)
         }
     }
 

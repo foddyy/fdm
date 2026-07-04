@@ -141,12 +141,11 @@ class DistanceMonitorService : LifecycleService() {
     }
 
     private fun startCameraMonitoring() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-
-        cameraProviderFuture.addListener({
+        // 使用主线程执行相机初始化，避免异步回调中的生命周期问题
+        Handler(Looper.getMainLooper()).post {
             try {
-                val cameraProvider = cameraProviderFuture.get()
-
+                val cameraProvider = ProcessCameraProvider.getInstance(this).get()
+                
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
@@ -157,27 +156,19 @@ class DistanceMonitorService : LifecycleService() {
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
                 cameraProvider.unbindAll()
-                // CameraX 在 Service 中直接使用 bindToLifecycle 即可，
-                // LifecycleService 本身就是 LifecycleOwner
-                cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
+                cameraProvider.bindToLifecycle(this@DistanceMonitorService, selector, imageAnalysis)
                 
-                // 相机绑定成功
                 Handler(Looper.getMainLooper()).post {
                     distanceDataStore.markCameraReady()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                // 相机绑定失败，记录错误信息
-                val errorMsg = try {
-                    e.message ?: e.javaClass.simpleName
-                } catch (ex: Exception) {
-                    "bind failed"
-                }
+                val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
                 Handler(Looper.getMainLooper()).post {
                     distanceDataStore.markCameraError(errorMsg)
                 }
             }
-        }, Executors.newSingleThreadExecutor())
+        }
     }
 
     private fun analyzeFrame(imageProxy: ImageProxy) {

@@ -13,4 +13,20 @@ class DistanceDataStore(private val context: Context) {
     fun getDistance(): Int {
         return prefs.getInt("current_distance_cm", -1)
     }
+    
+    fun markFrameProcessed() {
+        prefs.edit().putLong("last_frame_time", System.currentTimeMillis()).apply()
+    }
+    
+    fun getLastFrameTime(): Long {
+        return prefs.getLong("last_frame_time", 0)
+    }
+    
+    fun markServiceStarted(baselinePx: Float) {
+        prefs.edit().putFloat("service_baseline", baselinePx).apply()
+    }
+    
+    fun getServiceBaseline(): Float {
+        return prefs.getFloat("service_baseline", -1f)
+    }
 }

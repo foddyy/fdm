@@ -122,17 +122,13 @@ class DistanceMonitorService : LifecycleService() {
                 baselineEyeDistancePx = getSharedPreferences("app_prefs", MODE_PRIVATE)
                     .getFloat("baseline_eye_distance_px", 0f)
 
+                // 记录Service启动状态
+                distanceDataStore.markServiceStarted(baselineEyeDistancePx)
+
                 if (baselineEyeDistancePx > 0) {
                     isMonitoring = true
-                    // 调试Toast：确认Service已启动
-                    Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(this, "监控已启动，基线=${baselineEyeDistancePx.toInt()}px", Toast.LENGTH_LONG).show()
-                    }
                     startCameraMonitoring()
                 } else {
-                    Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(this, "校准数据为空，请先校准", Toast.LENGTH_LONG).show()
-                    }
                     stopSelf()
                 }
             }
@@ -183,6 +179,9 @@ class DistanceMonitorService : LifecycleService() {
             return
         }
         lastFrameTimeMs = now
+        
+        // 标记这一帧被处理了（不管有没有检测到人脸）
+        distanceDataStore.markFrameProcessed()
 
         val mediaImage = imageProxy.image
         if (mediaImage == null) {
@@ -210,14 +209,6 @@ class DistanceMonitorService : LifecycleService() {
                         val estimatedDistanceCm = (NORMAL_READING_DISTANCE_CM.toFloat() *
                             baselineEyeDistancePx / currentEyeDistancePx).toInt()
 
-                        // 首次检测到人脸时提示
-                        if (lastReportedDistance < 0) {
-                            Handler(Looper.getMainLooper()).post {
-                                Toast.makeText(this, "检测到人脸，双眼间距=${currentEyeDistancePx.toInt()}px，距离=${estimatedDistanceCm}cm", Toast.LENGTH_LONG).show()
-                            }
-                        }
-
-                        // 调试日志：在手机上弹出Toast显示检测信息
                         val isNear = estimatedDistanceCm < THRESHOLD_DISTANCE_CM
                         if (isNear) {
                             consecutiveNearCount++

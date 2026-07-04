@@ -183,19 +183,22 @@ class MainActivity : AppCompatActivity() {
         val runnable = object : Runnable {
             override fun run() {
                 val distance = distanceDataStore.getDistance()
+                val lastFrame = distanceDataStore.getLastFrameTime()
+                val baseline = distanceDataStore.getServiceBaseline()
+                
+                val now = System.currentTimeMillis()
+                val frameAgeSec = if (lastFrame > 0) ((now - lastFrame) / 1000).toInt() else -1
+                
                 if (distance >= 0) {
                     binding.tvEstimatedDistance.text = getString(R.string.distance_info, distance)
-                    if (serviceRunning) {
-                        binding.tvDebugInfo.text = "调试: 服务运行中, 距离=$distance cm"
-                    } else {
-                        binding.tvDebugInfo.text = "调试: 未检测到人脸"
-                    }
+                    binding.tvDebugInfo.text = "基线=${baseline.toInt()}px | 距离=${distance}cm | 最后帧=${frameAgeSec}s前"
                 } else {
                     binding.tvEstimatedDistance.text = "等待检测..."
-                    if (serviceRunning) {
-                        binding.tvDebugInfo.text = "调试: 服务运行中, 但无距离数据"
-                    } else {
-                        binding.tvDebugInfo.text = "调试: 请先校准并点击开始监控"
+                    when {
+                        baseline < 0 -> binding.tvDebugInfo.text = "调试: Service未启动或基线=0"
+                        frameAgeSec < 0 -> binding.tvDebugInfo.text = "调试: Service运行中, 但相机未处理帧"
+                        frameAgeSec > 5 -> binding.tvDebugInfo.text = "调试: 相机卡住(${frameAgeSec}s), 基线=${baseline.toInt()}px"
+                        else -> binding.tvDebugInfo.text = "调试: 相机正常(${frameAgeSec}s前), 但未检测到人脸"
                     }
                 }
                 distanceUpdateHandler.postDelayed(this, DISTANCE_UPDATE_INTERVAL)

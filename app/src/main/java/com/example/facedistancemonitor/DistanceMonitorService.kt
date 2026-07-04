@@ -157,9 +157,9 @@ class DistanceMonitorService : LifecycleService() {
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
                 cameraProvider.unbindAll()
-                // bindToLifecycle 在 Service 中不可靠，改用 bindTo 配合 ProcessCameraProvider
-                val useCaseProviderMap = mapOf(ImageAnalysis::class.java to imageAnalysis)
-                cameraProvider.bindProcessToLifecycle(selector, useCaseProviderMap)
+                // CameraX 在 Service 中直接使用 bindToLifecycle 即可，
+                // LifecycleService 本身就是 LifecycleOwner
+                cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
                 
                 // 相机绑定成功
                 Handler(Looper.getMainLooper()).post {

@@ -144,24 +144,33 @@ class DistanceMonitorService : LifecycleService() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-
-            val preview = Preview.Builder().build()
-
-            val imageAnalysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-
-            imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
-                analyzeFrame(imageProxy)
-            }
-
-            val selector = CameraSelector.DEFAULT_FRONT_CAMERA
             try {
+                val cameraProvider = cameraProviderFuture.get()
+
+                val preview = Preview.Builder().build()
+
+                val imageAnalysis = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+
+                imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
+                    analyzeFrame(imageProxy)
+                }
+
+                val selector = CameraSelector.DEFAULT_FRONT_CAMERA
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(this, selector, preview, imageAnalysis)
+                
+                // 相机绑定成功，通知MainActivity
+                Handler(Looper.getMainLooper()).post {
+                    distanceDataStore.markCameraReady()
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
+                // 相机绑定失败，标记错误
+                Handler(Looper.getMainLooper()).post {
+                    distanceDataStore.markCameraError(e.message ?: "unknown")
+                }
             }
         }, Executors.newSingleThreadExecutor())
     }

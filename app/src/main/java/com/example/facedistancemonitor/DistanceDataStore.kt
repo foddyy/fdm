@@ -29,4 +29,16 @@ class DistanceDataStore(private val context: Context) {
     fun getServiceBaseline(): Float {
         return prefs.getFloat("service_baseline", -1f)
     }
+    
+    fun markCameraReady() {
+        prefs.edit().putString("camera_status", "ready").apply()
+    }
+    
+    fun markCameraError(msg: String) {
+        prefs.edit().putString("camera_status", "error:$msg").apply()
+    }
+    
+    fun getCameraStatus(): String {
+        return prefs.getString("camera_status", "none") ?: "none"
+    }
 }

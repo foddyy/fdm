@@ -185,20 +185,23 @@ class MainActivity : AppCompatActivity() {
                 val distance = distanceDataStore.getDistance()
                 val lastFrame = distanceDataStore.getLastFrameTime()
                 val baseline = distanceDataStore.getServiceBaseline()
+                val cameraStatus = distanceDataStore.getCameraStatus()
                 
                 val now = System.currentTimeMillis()
                 val frameAgeSec = if (lastFrame > 0) ((now - lastFrame) / 1000).toInt() else -1
                 
                 if (distance >= 0) {
                     binding.tvEstimatedDistance.text = getString(R.string.distance_info, distance)
-                    binding.tvDebugInfo.text = "基线=${baseline.toInt()}px | 距离=${distance}cm | 最后帧=${frameAgeSec}s前"
+                    binding.tvDebugInfo.text = "基线=${baseline.toInt()}px | 距离=${distance}cm | 帧=${frameAgeSec}s前 | 相机=$cameraStatus"
                 } else {
                     binding.tvEstimatedDistance.text = "等待检测..."
                     when {
                         baseline < 0 -> binding.tvDebugInfo.text = "调试: Service未启动或基线=0"
-                        frameAgeSec < 0 -> binding.tvDebugInfo.text = "调试: Service运行中, 但相机未处理帧"
+                        cameraStatus == "none" -> binding.tvDebugInfo.text = "调试: Service运行中, 相机未初始化"
+                        cameraStatus.startsWith("error:") -> binding.tvDebugInfo.text = "调试: 相机错误: ${cameraStatus.substring(6)}"
+                        frameAgeSec < 0 -> binding.tvDebugInfo.text = "调试: 相机就绪但未处理帧"
                         frameAgeSec > 5 -> binding.tvDebugInfo.text = "调试: 相机卡住(${frameAgeSec}s), 基线=${baseline.toInt()}px"
-                        else -> binding.tvDebugInfo.text = "调试: 相机正常(${frameAgeSec}s前), 但未检测到人脸"
+                        else -> binding.tvDebugInfo.text = "调试: 相机正常(${frameAgeSec}s前), 未检测到人脸"
                     }
                 }
                 distanceUpdateHandler.postDelayed(this, DISTANCE_UPDATE_INTERVAL)

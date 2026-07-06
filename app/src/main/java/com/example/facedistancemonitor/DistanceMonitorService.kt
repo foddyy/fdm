@@ -224,6 +224,34 @@ class DistanceMonitorService : LifecycleService() {
             }
         }
     }
+    
+    private fun restartCamera() {
+        // 停止旧相机绑定，然后重新启动
+        Handler(Looper.getMainLooper()).post {
+            try {
+                val cameraProvider = ProcessCameraProvider.getInstance(applicationContext).get()
+                cameraProvider.unbindAll()
+                
+                val imageAnalysis = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+
+                imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
+                    analyzeFrame(imageProxy)
+                }
+
+                val selector = CameraSelector.DEFAULT_FRONT_CAMERA
+                cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
+                
+                distanceDataStore.markCameraReady()
+                android.util.Log.d("DistanceMonitorService", "Camera restarted after orientation change")
+            } catch (e: Exception) {
+                val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
+                distanceDataStore.markCameraError(errorMsg)
+                android.util.Log.e("DistanceMonitorService", "Camera restart failed: $errorMsg", e)
+            }
+        }
+    }
 
     private fun analyzeFrame(imageProxy: ImageProxy) {
         if (!isMonitoring || baselineEyeDistancePx <= 0) {

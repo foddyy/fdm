@@ -3,7 +3,7 @@
 
     <!-- Calibration screen -->
     <string name="calibration_title">距离校准</string>
-    <string name="calibration_instruction">请将手机放在正常阅读距离（约30-40厘米），正对摄像头。</string>
+    <string name="calibration_instruction">建议把手机放在距离面部35厘米（不要小于30厘米）处，正对摄像头。</string>
     <string name="calibration_hint">确保光线充足，面部清晰可见。</string>
     <string name="btn_calibrate">点击校准</string>
     <string name="calibrating">校准中…</string>

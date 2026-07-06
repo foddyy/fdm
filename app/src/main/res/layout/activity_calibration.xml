@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/bg_dark"
+    android:background="#FFFFFF"
     android:padding="16dp">
 
     <!-- Title -->
@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/calibration_title"
-        android:textColor="@color/white"
+        android:textColor="#333333"
         android:textSize="24sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"
@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/calibration_instruction"
-        android:textColor="@color/white"
+        android:textColor="#333333"
         android:textSize="14sp"
         android:gravity="center"
         android:layout_marginBottom="4dp" />
@@ -35,7 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/calibration_hint"
-        android:textColor="#AAAAAA"
+        android:textColor="#999999"
         android:textSize="12sp"
         android:gravity="center"
         android:layout_marginBottom="12dp" />
@@ -55,8 +55,8 @@
         android:layout_height="56dp"
         android:text="@string/btn_calibrate"
         android:textSize="16sp"
-        android:backgroundTint="@color/accent_blue"
-        android:textColor="@color/white" />
+        android:backgroundTint="#2196F3"
+        android:textColor="#FFFFFF" />
 
     <!-- Status Text -->
     <TextView
@@ -64,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
-        android:textColor="@color/red"
+        android:textColor="#F44336"
         android:textSize="14sp"
         android:gravity="center"
         android:layout_marginTop="8dp"

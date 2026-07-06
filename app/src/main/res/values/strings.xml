@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Face Distance Monitor</string>
+    <string name="app_name">远点</string>
 
     <!-- Calibration screen -->
     <string name="calibration_title">距离校准</string>
@@ -11,7 +11,7 @@
     <string name="calibration_failed">校准失败，请重试。</string>
 
     <!-- Main screen -->
-    <string name="main_title">面部距离监控</string>
+    <string name="main_title">远点</string>
     <string name="btn_start_monitor">开始监控</string>
     <string name="btn_stop_monitor">停止监控</string>
     <string name="btn_recalibrate">重新校准</string>
@@ -22,6 +22,6 @@
     <string name="threshold_info">阈值: 30 cm</string>
 
     <!-- Alert overlay -->
-    <string name="alert_overlay_title">请保持安全距离</string>
-    <string name="alert_overlay_subtitle">将手机远离面部至少30厘米</string>
+    <string name="alert_overlay_title">你离手机太近了！</string>
+    <string name="alert_overlay_subtitle"></string>
 </resources>

@@ -12,7 +12,14 @@
         android:padding="24dp"
         android:gravity="center_horizontal">
 
-        <!-- App Title -->
+        <!-- App Title with Logo -->
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/ic_logo"
+            android:contentDescription="@string/app_name"
+            android:layout_marginBottom="8dp" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -20,7 +27,7 @@
             android:textColor="@color/white"
             android:textSize="28sp"
             android:textStyle="bold"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="24dp" />
 
         <!-- Status Indicator Circle -->
@@ -58,16 +65,6 @@
             android:text="@string/threshold_info"
             android:textColor="#AAAAAA"
             android:textSize="14sp"
-            android:layout_marginBottom="4dp" />
-
-        <!-- Debug info -->
-        <TextView
-            android:id="@+id/tvDebugInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="调试: 无"
-            android:textColor="#666666"
-            android:textSize="11sp"
             android:layout_marginBottom="24dp" />
 
         <!-- Action Buttons -->
@@ -91,15 +88,22 @@
             android:textColor="@color/white"
             android:layout_marginBottom="12dp" />
 
-        <!-- Info Text -->
+        <!-- Tip QR Code -->
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="该应用将持续使用前置摄像头监测\n面部与屏幕的距离\n当距离小于30cm时触发红色闪烁警示"
-            android:textColor="#777777"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:layout_marginTop="16dp" />
+            android:text="打赏作者"
+            android:textColor="#AAAAAA"
+            android:textSize="14sp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp" />
+
+        <ImageView
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:src="@drawable/ic_tip_qr"
+            android:contentDescription="打赏码"
+            android:layout_marginBottom="24dp" />
 
     </LinearLayout>
 </ScrollView>

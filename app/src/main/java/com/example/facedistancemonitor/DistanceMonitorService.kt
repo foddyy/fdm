@@ -25,7 +25,9 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import android.os.Handler
 import android.os.Looper
-import android.widget.Toast
+import android.speech.tts.TextToSpeech
+import android.media.AudioAttributes
+import java.util.Locale
 
 class DistanceMonitorService : LifecycleService() {
 
@@ -57,14 +59,61 @@ class DistanceMonitorService : LifecycleService() {
     
     // 连续过近计数
     private var consecutiveNearCount = 0
-
+    
+    // 语音TTS
+    private var tts: TextToSpeech? = null
+    private var ttsInitialized = false
+    
+    // 休息计时器：每20分钟提醒一次
+    private val restReminderHandler = Handler(Looper.getMainLooper())
+    private var restReminderRunnable: Runnable? = null
+    private var lastRestReminderTime = 0L
+    private val REST_REMINDER_INTERVAL_MS = 20 * 60 * 1000L // 20分钟
+    
     override fun onCreate() {
         super.onCreate()
         distanceDataStore = DistanceDataStore(this)
         setupFaceDetector()
+        setupTTS()
         cameraExecutor = Executors.newSingleThreadExecutor()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         startForegroundService()
+    }
+    
+    private fun setupTTS() {
+        tts = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts?.language = Locale.CHINA
+                tts?.setPitch(1.0f)
+                tts?.setSpeechRate(0.9f)
+                ttsInitialized = true
+            }
+        }
+    }
+    
+    private fun speakText(text: String) {
+        if (ttsInitialized && tts != null) {
+            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "rest_reminder")
+        }
+    }
+    
+    private fun startRestReminder() {
+        restReminderRunnable = Runnable {
+            val now = System.currentTimeMillis()
+            if (now - lastRestReminderTime >= REST_REMINDER_INTERVAL_MS && isMonitoring) {
+                speakText("休息一下眼睛吧，看看远方")
+                lastRestReminderTime = now
+            }
+            // 每20分钟循环一次
+            restReminderHandler.postDelayed(restReminderRunnable!!, REST_REMINDER_INTERVAL_MS)
+        }
+        restReminderHandler.post(restReminderRunnable!!)
+    }
+    
+    private fun stopRestReminder() {
+        restReminderRunnable?.let {
+            restReminderHandler.removeCallbacks(it)
+        }
     }
 
     private fun setupFaceDetector() {
@@ -129,13 +178,21 @@ class DistanceMonitorService : LifecycleService() {
                 if (baselineEyeDistancePx > 0) {
                     isMonitoring = true
                     startCameraMonitoring()
+                    startRestReminder()
                 } else {
                     stopSelf()
                 }
             }
             "ACTION_STOP_MONITORING" -> {
                 stopMonitoring()
+                stopRestReminder()
                 stopSelf()
+            }
+            "ACTION_RESTART_CAMERA" -> {
+                // 横竖屏切换时重启相机
+                if (isMonitoring) {
+                    restartCamera()
+                }
             }
         }
         return START_STICKY
@@ -281,6 +338,9 @@ class DistanceMonitorService : LifecycleService() {
     override fun onDestroy() {
         super.onDestroy()
         stopMonitoring()
+        stopRestReminder()
+        tts?.stop()
+        tts?.shutdown()
         cameraExecutor.shutdown()
         faceDetector?.close()
     }

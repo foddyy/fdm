@@ -64,10 +64,25 @@ class MainActivity : AppCompatActivity() {
 
         if (!isCalibrated) {
             startActivity(Intent(this, CalibrationActivity::class.java))
+        } else {
+            // 已校准过，检查PIN码
+            checkPin {
+                setupUI()
+                startDistanceUpdates()
+            }
         }
-
-        setupUI()
-        startDistanceUpdates()
+    }
+    
+    /** 检查PIN码，通过后执行callback */
+    private fun checkPin(onSuccess: () -> Unit) {
+        val pinManager = PinManager(this)
+        if (pinManager.isPinSet()) {
+            PinDialog(this, PinDialog.Mode.VERIFY) {
+                onSuccess()
+            }.show()
+        } else {
+            onSuccess()
+        }
     }
 
     private fun setupUI() {

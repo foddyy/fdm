@@ -140,6 +140,11 @@ class CalibrationActivity : AppCompatActivity() {
                 setStatusText("校准成功！基准双眼间距: ${avgDistance.toInt()} px")
                 binding.btnCalibrate.isEnabled = true
 
+                // 校准成功后提示设置PIN码
+                PinDialog(this, PinDialog.Mode.SET) {
+                    android.util.Log.d("CalibrationActivity", "PIN码已设置")
+                }.show()
+
                 Handler(Looper.getMainLooper()).postDelayed({
                     finish()
                 }, 1500)

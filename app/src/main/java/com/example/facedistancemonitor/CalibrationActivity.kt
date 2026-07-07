@@ -1,5 +1,7 @@
 package com.example.facedistancemonitor
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -53,12 +55,12 @@ class CalibrationActivity : AppCompatActivity() {
         faceDetector = FaceDetection.getClient(options)
 
         // 检查相机权限
-        if (androidx.core.content.ContextCompat.checkSelfPermission(
-                this, android.Manifest.permission.CAMERA) ==
-            androidx.core.content.PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED) {
             setupCamera()
         } else {
-            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
 
         binding.btnCalibrate.setOnClickListener {

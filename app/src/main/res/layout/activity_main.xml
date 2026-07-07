@@ -12,16 +12,7 @@
         android:padding="24dp"
         android:gravity="center_horizontal">
 
-        <!-- App Title -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="【远点】"
-            android:textColor="#1A1A1A"
-            android:textSize="42sp"
-            android:textStyle="bold"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="24dp" />
+        <!-- App Title - REMOVED per user request -->
 
         <!-- Status Indicator Circle -->
         <View

@@ -160,13 +160,17 @@ class CalibrationActivity : AppCompatActivity() {
                 binding.btnCalibrate.isEnabled = true
 
                 // 校准成功后提示设置PIN码
-                PinDialog(this, PinDialog.Mode.SET) {
+                val dialog = PinDialog(this, PinDialog.Mode.SET) {
                     android.util.Log.d("CalibrationActivity", "PIN码已设置")
-                }.show()
+                }
+                dialog.show()
 
-                Handler(Looper.getMainLooper()).postDelayed({
-                    finish()
-                }, 1500)
+                // 等待用户关闭对话框后再结束Activity
+                dialog.setOnDismissListener {
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        finish()
+                    }, 1000)
+                }
             } else {
                 setStatusText("校准失败：未检测到足够的人脸数据")
                 binding.btnCalibrate.isEnabled = true

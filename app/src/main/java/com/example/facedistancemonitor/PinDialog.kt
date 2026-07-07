@@ -8,13 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 
 /**
- * PIN码输入对话框 — 使用DialogFragment确保正确显示
+ * PIN码输入对话框 — 简化版，确保按钮可点击
  */
 class PinDialog(
     private val mode: Mode,
@@ -33,22 +32,24 @@ class PinDialog(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // 使用FrameLayout包裹整个内容
-        val root = FrameLayout(requireContext())
-        root.layoutParams = FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
+        // 外层FrameLayout
+        val root = FrameLayout(requireContext()).apply {
+            setBackgroundColor(Color.WHITE)
+            layoutParams = FrameLayout.LayoutParams(
+                (resources.displayMetrics.widthPixels * 0.85).toInt(),
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { gravity = Gravity.CENTER }
+        }
 
-        // 创建PIN输入面板
+        // 内层LinearLayout
         val panel = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(Color.WHITE)
             setPadding(32, 32, 32, 32)
             layoutParams = FrameLayout.LayoutParams(
-                (resources.displayMetrics.widthPixels * 0.85).toInt(),
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply { gravity = Gravity.CENTER }
+            )
         }
 
         pinManager = PinManager(requireContext())
@@ -82,58 +83,60 @@ class PinDialog(
         }
         panel.addView(dotsLayout)
 
-        // 数字网格
-        val grid = GridLayout(requireContext()).apply {
-            columnCount = 3
-            rowCount = 4
-            layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        }
+        // 数字按钮 - 3行
+        val digitRows = listOf(
+            listOf('1', '2', '3'),
+            listOf('4', '5', '6'),
+            listOf('7', '8', '9')
+        )
 
-        // 数字按钮
-        val digits = listOf('1','2','3','4','5','6','7','8','9','0')
-        digits.forEach { digit ->
-            val btn = Button(requireContext()).apply {
-                text = digit.toString()
-                textSize = 24f
-                setTextColor(Color.parseColor("#333333"))
-                setBackgroundColor(Color.parseColor("#F5F5F5"))
-                layoutParams = GridLayout.LayoutParams().apply {
-                    setGravity(android.util.TypedValue.applyDimension(
-                        android.util.TypedValue.COMPLEX_UNIT_SP, 0f, resources.displayMetrics
-                    ).toInt())
-                    width = 0
-                    height = 0
-                    columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                    rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                    setMargins(4, 4, 4, 4)
-                }
-                setOnClickListener {
-                    if (currentInput.length < 4) {
-                        currentInput += digit
-                        updateDots()
-                        if (currentInput.length == 4) {
-                            handlePinInput()
+        digitRows.forEach { rowDigits ->
+            val rowLayout = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply { weightSum = 3f }
+            }
+            rowDigits.forEach { digit ->
+                val btn = Button(requireContext()).apply {
+                    text = digit.toString()
+                    textSize = 24f
+                    setTextColor(Color.parseColor("#333333"))
+                    setBackgroundColor(Color.parseColor("#E0E0E0"))
+                    layoutParams = LinearLayout.LayoutParams(0, 64, 1f).apply {
+                        setMargins(4, 4, 4, 4)
+                    }
+                    setOnClickListener {
+                        if (currentInput.length < 4) {
+                            currentInput += digit
+                            updateDots()
+                            if (currentInput.length == 4) {
+                                handlePinInput()
+                            }
                         }
                     }
                 }
+                rowLayout.addView(btn)
             }
-            grid.addView(btn)
+            panel.addView(rowLayout)
         }
 
-        // 清除按钮
+        // 第四行：清除、0、确认
+        val row4 = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { weightSum = 3f }
+        }
+
         val btnClear = Button(requireContext()).apply {
             text = "清除"
             textSize = 18f
             setTextColor(Color.RED)
             setBackgroundColor(Color.parseColor("#FFEAEA"))
-            layoutParams = GridLayout.LayoutParams().apply {
-                width = 0
-                height = 0
-                columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+            layoutParams = LinearLayout.LayoutParams(0, 64, 1f).apply {
                 setMargins(4, 4, 4, 4)
             }
             setOnClickListener {
@@ -142,28 +145,43 @@ class PinDialog(
                 tvError.text = ""
             }
         }
-        grid.addView(btnClear)
+        row4.addView(btnClear)
 
-        // 确认按钮
+        val btn0 = Button(requireContext()).apply {
+            text = "0"
+            textSize = 24f
+            setTextColor(Color.parseColor("#333333"))
+            setBackgroundColor(Color.parseColor("#E0E0E0"))
+            layoutParams = LinearLayout.LayoutParams(0, 64, 1f).apply {
+                setMargins(4, 4, 4, 4)
+            }
+            setOnClickListener {
+                if (currentInput.length < 4) {
+                    currentInput += '0'
+                    updateDots()
+                    if (currentInput.length == 4) {
+                        handlePinInput()
+                    }
+                }
+            }
+        }
+        row4.addView(btn0)
+
         val btnConfirm = Button(requireContext()).apply {
             text = "✓"
             textSize = 24f
             setTextColor(Color.WHITE)
             setBackgroundColor(Color.parseColor("#2196F3"))
-            layoutParams = GridLayout.LayoutParams().apply {
-                width = 0
-                height = 0
-                columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+            layoutParams = LinearLayout.LayoutParams(0, 64, 1f).apply {
                 setMargins(4, 4, 4, 4)
             }
             setOnClickListener {
                 handlePinInput()
             }
         }
-        grid.addView(btnConfirm)
+        row4.addView(btnConfirm)
 
-        panel.addView(grid)
+        panel.addView(row4)
 
         // 错误提示
         tvError = TextView(requireContext()).apply {

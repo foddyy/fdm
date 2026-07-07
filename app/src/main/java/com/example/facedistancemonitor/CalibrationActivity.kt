@@ -28,6 +28,16 @@ class CalibrationActivity : AppCompatActivity() {
     private var baselineEyeDistancePx: Float = 0f
     private var calibrationCount: Int = 0
 
+    private val cameraPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            setupCamera()
+        } else {
+            setStatusText("需要相机权限才能校准")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCalibrationBinding.inflate(layoutInflater)
@@ -42,7 +52,14 @@ class CalibrationActivity : AppCompatActivity() {
             .build()
         faceDetector = FaceDetection.getClient(options)
 
-        setupCamera()
+        // 检查相机权限
+        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                this, android.Manifest.permission.CAMERA) ==
+            androidx.core.content.PackageManager.PERMISSION_GRANTED) {
+            setupCamera()
+        } else {
+            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+        }
 
         binding.btnCalibrate.setOnClickListener {
             startCalibration()

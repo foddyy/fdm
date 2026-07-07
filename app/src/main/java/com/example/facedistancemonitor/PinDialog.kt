@@ -2,120 +2,199 @@ package com.example.facedistancemonitor
 
 import android.app.Dialog
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.view.Window
 import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.GridLayout
+import androidx.fragment.app.DialogFragment
 
 /**
- * PIN码输入对话框
- * 用于验证PIN码或设置新PIN码
+ * PIN码输入对话框 — 使用DialogFragment确保正确显示
  */
 class PinDialog(
-    private val context: Context,
-    private val mode: Mode, // SET或VERIFY
+    private val mode: Mode,
     private val onSuccess: () -> Unit
-) : Dialog(context) {
+) : DialogFragment() {
 
     enum class Mode { SET, VERIFY }
 
     private lateinit var pinManager: PinManager
     private var currentInput = ""
-    private var dots = arrayOf<TextView?>(null, null, null, null)
+    private var dotViews = arrayOf<TextView?>(null, null, null, null)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
-        setContentView(R.layout.dialog_pin)
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        return dialog
+    }
 
-        pinManager = PinManager(context)
-        
-        // 设置标题
-        val tvTitle = findViewById<TextView>(R.id.tvPinTitle)
-        tvTitle.text = if (mode == Mode.SET) "请设置4位PIN码" else "请输入PIN码"
-
-        // 获取圆点引用
-        dots = arrayOf(
-            findViewById(R.id.dot1),
-            findViewById(R.id.dot2),
-            findViewById(R.id.dot3),
-            findViewById(R.id.dot4)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        // 使用FrameLayout包裹整个内容
+        val root = FrameLayout(requireContext())
+        root.layoutParams = FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
         )
+
+        // 创建PIN输入面板
+        val panel = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(Color.WHITE)
+            setPadding(32, 32, 32, 32)
+            layoutParams = FrameLayout.LayoutParams(
+                (resources.displayMetrics.widthPixels * 0.85).toInt(),
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { gravity = Gravity.CENTER }
+        }
+
+        pinManager = PinManager(requireContext())
+
+        // 标题
+        val tvTitle = TextView(requireContext()).apply {
+            text = if (mode == Mode.SET) "请设置4位PIN码" else "请输入PIN码"
+            textSize = 18f
+            setTextColor(Color.parseColor("#333333"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 16)
+        }
+        panel.addView(tvTitle)
+
+        // 圆点指示器
+        val dotsLayout = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(0, 0, 0, 24)
+        }
+        for (i in 0..3) {
+            val dot = TextView(requireContext()).apply {
+                text = "●"
+                textSize = 24f
+                setTextColor(Color.LTGRAY)
+                setPadding(8, 0, 8, 0)
+            }
+            dotsLayout.addView(dot)
+            dotViews[i] = dot
+        }
+        panel.addView(dotsLayout)
+
+        // 数字网格
+        val grid = GridLayout(requireContext()).apply {
+            columnCount = 3
+            rowCount = 4
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val btnStyle = FrameLayout.LayoutParams(0, 0, 1f).apply {
+            setMargins(4, 4, 4, 4)
+        }
 
         // 数字按钮
-        val btnNumbers = listOf(
-            R.id.btn0 to '0', R.id.btn1 to '1', R.id.btn2 to '2',
-            R.id.btn3 to '3', R.id.btn4 to '4', R.id.btn5 to '5',
-            R.id.btn6 to '6', R.id.btn7 to '7', R.id.btn8 to '8',
-            R.id.btn9 to '9'
-        )
-
-        btnNumbers.forEach { (resId, digit) ->
-            findViewById<Button>(resId).setOnClickListener {
-                if (currentInput.length < 4) {
-                    currentInput += digit
-                    updateDots()
-                    if (currentInput.length == 4) {
-                        // 自动验证
-                        handlePinInput()
+        val digits = listOf('1','2','3','4','5','6','7','8','9','0')
+        digits.forEachIndexed { index, digit ->
+            val btn = Button(requireContext()).apply {
+                text = digit.toString()
+                textSize = 24f
+                setTextColor(Color.parseColor("#333333"))
+                setBackgroundColor(Color.parseColor("#F5F5F5"))
+                layoutParams = btnStyle
+                setOnClickListener {
+                    if (currentInput.length < 4) {
+                        currentInput += digit
+                        updateDots()
+                        if (currentInput.length == 4) {
+                            handlePinInput()
+                        }
                     }
                 }
             }
+            grid.addView(btn)
         }
 
         // 清除按钮
-        findViewById<Button>(R.id.btnClear).setOnClickListener {
-            currentInput = ""
-            updateDots()
-            findViewById<TextView>(R.id.tvPinError).text = ""
+        val btnClear = Button(requireContext()).apply {
+            text = "清除"
+            textSize = 18f
+            setTextColor(Color.RED)
+            setBackgroundColor(Color.parseColor("#FFEAEA"))
+            layoutParams = btnStyle
+            setOnClickListener {
+                currentInput = ""
+                updateDots()
+                tvError.text = ""
+            }
         }
+        grid.addView(btnClear)
 
         // 确认按钮
-        findViewById<Button>(R.id.btnConfirm).setOnClickListener {
-            handlePinInput()
+        val btnConfirm = Button(requireContext()).apply {
+            text = "✓"
+            textSize = 24f
+            setTextColor(Color.WHITE)
+            setBackgroundColor(Color.parseColor("#2196F3"))
+            layoutParams = btnStyle
+            setOnClickListener {
+                handlePinInput()
+            }
         }
+        grid.addView(btnConfirm)
+
+        panel.addView(grid)
+
+        // 错误提示
+        val tvError = TextView(requireContext()).apply {
+            text = ""
+            textSize = 14f
+            setTextColor(Color.RED)
+            gravity = Gravity.CENTER
+            setPadding(0, 12, 0, 0)
+        }
+        panel.addView(tvError)
+
+        root.addView(panel)
+        return root
     }
 
     private fun updateDots() {
-        dots.forEachIndexed { index, dot ->
+        dotViews.forEachIndexed { index, dot ->
             dot?.let {
-                it.setBackgroundResource(
-                    if (index < currentInput.length) R.drawable.pin_dot_filled
-                    else R.drawable.pin_dot_empty
+                it.setTextColor(
+                    if (index < currentInput.length) Color.BLACK
+                    else Color.LTGRAY
                 )
             }
         }
     }
 
     private fun handlePinInput() {
-        val errorTv = findViewById<TextView>(R.id.tvPinError)
-        
-        if (currentInput.length != 4) {
-            errorTv.text = "请输入4位数字"
-            return
-        }
+        if (currentInput.length != 4) return
 
         when (mode) {
             Mode.SET -> {
-                // 设置PIN码
                 if (pinManager.setPin(currentInput)) {
                     dismiss()
                     onSuccess()
-                } else {
-                    errorTv.text = "PIN码设置失败"
-                    currentInput = ""
-                    updateDots()
                 }
             }
             Mode.VERIFY -> {
-                // 验证PIN码
                 if (pinManager.verifyPin(currentInput)) {
                     dismiss()
                     onSuccess()
-                } else {
-                    errorTv.text = "PIN码错误"
-                    currentInput = ""
-                    updateDots()
                 }
             }
         }

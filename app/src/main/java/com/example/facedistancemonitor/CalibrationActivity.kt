@@ -160,10 +160,10 @@ class CalibrationActivity : AppCompatActivity() {
                 binding.btnCalibrate.isEnabled = true
 
                 // 校准成功后提示设置PIN码
-                val dialog = PinDialog(this, PinDialog.Mode.SET) {
+                val dialog = PinDialog(PinDialog.Mode.SET) {
                     android.util.Log.d("CalibrationActivity", "PIN码已设置")
                 }
-                dialog.show()
+                dialog.show(supportFragmentManager, "pin_dialog")
 
                 // 等待用户关闭对话框后再结束Activity
                 dialog.setOnDismissListener {

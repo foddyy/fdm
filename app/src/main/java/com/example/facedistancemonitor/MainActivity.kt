@@ -77,9 +77,9 @@ class MainActivity : AppCompatActivity() {
     private fun checkPin(onSuccess: () -> Unit) {
         val pinManager = PinManager(this)
         if (pinManager.isPinSet()) {
-            PinDialog(this, PinDialog.Mode.VERIFY) {
+            PinDialog(PinDialog.Mode.VERIFY) {
                 onSuccess()
-            }.show()
+            }.show(supportFragmentManager, "pin_dialog")
         } else {
             onSuccess()
         }

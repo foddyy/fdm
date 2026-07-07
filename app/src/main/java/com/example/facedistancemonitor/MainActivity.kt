@@ -9,7 +9,6 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.facedistancemonitor.databinding.ActivityMainBinding
@@ -26,29 +25,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val REQUEST_CODE_PERMISSIONS = 100
         const val REQUEST_CODE_OVERLAY_PERMISSION = 101
-    }
-
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val allGranted = permissions.values.all { it }
-        if (allGranted) {
-            Toast.makeText(this, "所有权限已授予", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "需要权限才能运行此应用", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private val overlayPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (Settings.canDrawOverlays(this)) {
-                Toast.makeText(this, "悬浮窗权限已授予", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "需要悬浮窗权限以显示警示", Toast.LENGTH_LONG).show()
-            }
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,9 +44,9 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, CalibrationActivity::class.java))
             }
         } else {
-            // 已校准：先请求权限，再检查PIN码
-            requestAllPermissions {
-                checkPin {
+            // 已校准：先检查PIN码，再请求权限
+            checkPin {
+                requestAllPermissions {
                     setupUI()
                     startDistanceUpdates()
                 }
@@ -78,32 +54,29 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    /** 请求所有权限，完成后执行callback */
-    private fun requestAllPermissions(onComplete: () -> Unit) {
+    /** 检查PIN码，通过后执行callback */
+    private fun checkPin(onSuccess: () -> Unit) {
         val pinManager = PinManager(this)
-        
-        // 先完成PIN验证（如果有），再请求权限
         if (pinManager.isPinSet()) {
             PinDialog(PinDialog.Mode.VERIFY) {
-                requestPermissionsInternal(onComplete)
+                onSuccess()
             }.show(supportFragmentManager, "pin_dialog")
         } else {
-            requestPermissionsInternal(onComplete)
+            onSuccess()
         }
     }
     
-    private fun requestPermissionsInternal(onComplete: () -> Unit) {
+    /** 请求所有权限 */
+    private fun requestAllPermissions(onComplete: () -> Unit) {
         if (hasAllPermissions()) {
             onComplete()
         } else {
-            // 保存callback，权限回来后执行
             _permissionCallback = onComplete
             requestPermissions(getPermissionArray(), REQUEST_CODE_PERMISSIONS)
         }
     }
     
     private var _permissionCallback: (() -> Unit)? = null
-    private val permissionCallback: (() -> Unit)? get() = _permissionCallback
     
     private fun getPermissionArray(): Array<String> {
         val list = mutableListOf<String>()
@@ -123,9 +96,9 @@ class MainActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        super.onRequestPermissionsResult(requestCode, grantResults)
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            permissionCallback?.let { callback ->
+            _permissionCallback?.let { callback ->
                 _permissionCallback = null
                 callback()
             }

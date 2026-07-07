@@ -1,19 +1,16 @@
 package com.example.facedistancemonitor
 
-import android.app.Dialog
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.GridLayout
 import androidx.fragment.app.DialogFragment
 
 /**
@@ -27,14 +24,9 @@ class PinDialog(
     enum class Mode { SET, VERIFY }
 
     private lateinit var pinManager: PinManager
+    private lateinit var tvError: TextView
     private var currentInput = ""
     private var dotViews = arrayOf<TextView?>(null, null, null, null)
-
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = super.onCreateDialog(savedInstanceState)
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        return dialog
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -100,19 +92,24 @@ class PinDialog(
             )
         }
 
-        val btnStyle = FrameLayout.LayoutParams(0, 0, 1f).apply {
-            setMargins(4, 4, 4, 4)
-        }
-
         // 数字按钮
         val digits = listOf('1','2','3','4','5','6','7','8','9','0')
-        digits.forEachIndexed { index, digit ->
+        digits.forEach { digit ->
             val btn = Button(requireContext()).apply {
                 text = digit.toString()
                 textSize = 24f
                 setTextColor(Color.parseColor("#333333"))
                 setBackgroundColor(Color.parseColor("#F5F5F5"))
-                layoutParams = btnStyle
+                layoutParams = GridLayout.LayoutParams().apply {
+                    setGravity(android.util.TypedValue.applyDimension(
+                        android.util.TypedValue.COMPLEX_UNIT_SP, 0f, resources.displayMetrics
+                    ).toInt())
+                    width = 0
+                    height = 0
+                    columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                    rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                    setMargins(4, 4, 4, 4)
+                }
                 setOnClickListener {
                     if (currentInput.length < 4) {
                         currentInput += digit
@@ -132,7 +129,13 @@ class PinDialog(
             textSize = 18f
             setTextColor(Color.RED)
             setBackgroundColor(Color.parseColor("#FFEAEA"))
-            layoutParams = btnStyle
+            layoutParams = GridLayout.LayoutParams().apply {
+                width = 0
+                height = 0
+                columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                setMargins(4, 4, 4, 4)
+            }
             setOnClickListener {
                 currentInput = ""
                 updateDots()
@@ -147,7 +150,13 @@ class PinDialog(
             textSize = 24f
             setTextColor(Color.WHITE)
             setBackgroundColor(Color.parseColor("#2196F3"))
-            layoutParams = btnStyle
+            layoutParams = GridLayout.LayoutParams().apply {
+                width = 0
+                height = 0
+                columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                setMargins(4, 4, 4, 4)
+            }
             setOnClickListener {
                 handlePinInput()
             }
@@ -157,7 +166,7 @@ class PinDialog(
         panel.addView(grid)
 
         // 错误提示
-        val tvError = TextView(requireContext()).apply {
+        tvError = TextView(requireContext()).apply {
             text = ""
             textSize = 14f
             setTextColor(Color.RED)

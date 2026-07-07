@@ -21,22 +21,12 @@
 
     <!-- Instructions -->
     <TextView
-        android:id="@+id/tvCalibrationInstruction"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/calibration_instruction"
-        android:textColor="#333333"
-        android:textSize="14sp"
-        android:gravity="center"
-        android:layout_marginBottom="4dp" />
-
-    <TextView
         android:id="@+id/tvCalibrationHint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/calibration_hint"
-        android:textColor="#999999"
-        android:textSize="12sp"
+        android:textColor="#666666"
+        android:textSize="14sp"
         android:gravity="center"
         android:layout_marginBottom="12dp" />
 
@@ -57,17 +47,5 @@
         android:textSize="16sp"
         android:backgroundTint="#2196F3"
         android:textColor="#FFFFFF" />
-
-    <!-- Status Text -->
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textColor="#F44336"
-        android:textSize="14sp"
-        android:gravity="center"
-        android:layout_marginTop="8dp"
-        android:minHeight="24dp" />
 
 </LinearLayout>

@@ -3,8 +3,7 @@
 
     <!-- Calibration screen -->
     <string name="calibration_title">距离校准</string>
-    <string name="calibration_instruction">建议把手机放在距离面部35厘米（不要小于30厘米）处，正对摄像头。</string>
-    <string name="calibration_hint">确保光线充足，面部清晰可见。</string>
+    <string name="calibration_hint">建议手机与面部距离35厘米（最低30厘米）&#10;正对摄像头，确保光线充足，面部清晰可见。</string>
     <string name="btn_calibrate">点击校准</string>
     <string name="calibrating">校准中…</string>
     <string name="calibration_success">校准成功！基准距离已记录。</string>
@@ -19,7 +18,7 @@
     <string name="status_running">监控中</string>
     <string name="status_alert">⚠️ 警告：距离过近！</string>
     <string name="distance_info">估算距离: %d cm</string>
-    <string name="threshold_info">阈值: 30 cm</string>
+    <string name="threshold_info">阈值: 35 cm</string>
 
     <!-- Alert overlay -->
     <string name="alert_overlay_title">你离手机太近了！</string>

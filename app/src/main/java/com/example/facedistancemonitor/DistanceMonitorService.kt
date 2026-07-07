@@ -34,7 +34,7 @@ class DistanceMonitorService : LifecycleService() {
     companion object {
         const val CHANNEL_ID = "DistanceMonitorChannel"
         const val NOTIFICATION_ID = 1001
-        const val THRESHOLD_DISTANCE_CM = 30
+        const val THRESHOLD_DISTANCE_CM = 35
         const val NORMAL_READING_DISTANCE_CM = 35
         // 降频：相机每秒最多处理1帧
         const val FRAME_INTERVAL_MS = 1000L

@@ -19,7 +19,7 @@
     <string name="status_running">Monitoring</string>
     <string name="status_alert">⚠️ Too Close!</string>
     <string name="distance_info">%d cm</string>
-    <string name="threshold_info">Threshold: 30 cm</string>
+    <string name="threshold_info">Threshold: 35 cm</string>
 
     <!-- Alert overlay -->
     <string name="alert_overlay_title">You\'re Too Close!</string>

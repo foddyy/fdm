@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -58,7 +59,7 @@ class PinDialog(
         // PIN输入框（4位数字，隐藏输入）
         val etPin = EditText(requireContext()).apply {
             inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
-            maxLength = 4
+            (this as android.widget.TextView).maxLength = 4
             textSize = 24f
             gravity = Gravity.CENTER
             setPadding(16, 16, 16, 16)

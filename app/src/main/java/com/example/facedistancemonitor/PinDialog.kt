@@ -59,7 +59,7 @@ class PinDialog(
         // PIN输入框（4位数字，隐藏输入）
         val etPin = EditText(requireContext()).apply {
             inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
-            (this as android.widget.TextView).maxLength = 4
+            filters = arrayOf(android.text.InputFilter.LengthFilter(4))
             textSize = 24f
             gravity = Gravity.CENTER
             setPadding(16, 16, 16, 16)

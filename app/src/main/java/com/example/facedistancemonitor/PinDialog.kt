@@ -6,7 +6,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -32,24 +32,14 @@ class PinDialog(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // 外层FrameLayout
-        val root = FrameLayout(requireContext()).apply {
-            setBackgroundColor(Color.WHITE)
-            layoutParams = FrameLayout.LayoutParams(
-                (resources.displayMetrics.widthPixels * 0.85).toInt(),
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply { gravity = Gravity.CENTER }
-        }
-
-        // 内层LinearLayout
         val panel = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(Color.WHITE)
             setPadding(32, 32, 32, 32)
             layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
+                (resources.displayMetrics.widthPixels * 0.85).toInt(),
                 ViewGroup.LayoutParams.WRAP_CONTENT
-            )
+            ).apply { gravity = Gravity.CENTER }
         }
 
         pinManager = PinManager(requireContext())
@@ -65,123 +55,32 @@ class PinDialog(
         }
         panel.addView(tvTitle)
 
-        // 圆点指示器
-        val dotsLayout = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(0, 0, 0, 24)
-        }
-        for (i in 0..3) {
-            val dot = TextView(requireContext()).apply {
-                text = "●"
-                textSize = 24f
-                setTextColor(Color.LTGRAY)
-                setPadding(8, 0, 8, 0)
-            }
-            dotsLayout.addView(dot)
-            dotViews[i] = dot
-        }
-        panel.addView(dotsLayout)
-
-        // 数字按钮 - 3行
-        val digitRows = listOf(
-            listOf('1', '2', '3'),
-            listOf('4', '5', '6'),
-            listOf('7', '8', '9')
-        )
-
-        digitRows.forEach { rowDigits ->
-            val rowLayout = LinearLayout(requireContext()).apply {
-                orientation = LinearLayout.HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply { weightSum = 3f }
-            }
-            rowDigits.forEach { digit ->
-                val btn = Button(requireContext()).apply {
-                    text = digit.toString()
-                    textSize = 24f
-                    setTextColor(Color.parseColor("#333333"))
-                    setBackgroundColor(Color.parseColor("#E0E0E0"))
-                    layoutParams = LinearLayout.LayoutParams(0, 64, 1f).apply {
-                        setMargins(4, 4, 4, 4)
-                    }
-                    setOnClickListener {
-                        if (currentInput.length < 4) {
-                            currentInput += digit
-                            updateDots()
-                            if (currentInput.length == 4) {
-                                handlePinInput()
-                            }
-                        }
-                    }
-                }
-                rowLayout.addView(btn)
-            }
-            panel.addView(rowLayout)
-        }
-
-        // 第四行：清除、0、确认
-        val row4 = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.HORIZONTAL
+        // PIN输入框（4位数字，隐藏输入）
+        val etPin = EditText(requireContext()).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+            maxLength = 4
+            textSize = 24f
+            gravity = Gravity.CENTER
+            setPadding(16, 16, 16, 16)
+            setBackgroundColor(Color.parseColor("#F5F5F5"))
+            setTextColor(Color.BLACK)
             layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply { weightSum = 3f }
-        }
-
-        val btnClear = Button(requireContext()).apply {
-            text = "清除"
-            textSize = 18f
-            setTextColor(Color.RED)
-            setBackgroundColor(Color.parseColor("#FFEAEA"))
-            layoutParams = LinearLayout.LayoutParams(0, 64, 1f).apply {
-                setMargins(4, 4, 4, 4)
+                ViewGroup.LayoutParams.MATCH_PARENT, 80
+            ).apply { setMargins(0, 0, 0, 24) }
+            setOnEditorActionListener { _, _, _ ->
+                if (currentInput.length == 4) handlePinInput()
+                true
             }
-            setOnClickListener {
-                currentInput = ""
-                updateDots()
-                tvError.text = ""
-            }
-        }
-        row4.addView(btnClear)
-
-        val btn0 = Button(requireContext()).apply {
-            text = "0"
-            textSize = 24f
-            setTextColor(Color.parseColor("#333333"))
-            setBackgroundColor(Color.parseColor("#E0E0E0"))
-            layoutParams = LinearLayout.LayoutParams(0, 64, 1f).apply {
-                setMargins(4, 4, 4, 4)
-            }
-            setOnClickListener {
-                if (currentInput.length < 4) {
-                    currentInput += '0'
-                    updateDots()
-                    if (currentInput.length == 4) {
-                        handlePinInput()
-                    }
+            addTextChangedListener(object : android.text.TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: android.text.Editable?) {
+                    currentInput = s.toString()
+                    if (currentInput.length == 4) handlePinInput()
                 }
-            }
+            })
         }
-        row4.addView(btn0)
-
-        val btnConfirm = Button(requireContext()).apply {
-            text = "✓"
-            textSize = 24f
-            setTextColor(Color.WHITE)
-            setBackgroundColor(Color.parseColor("#2196F3"))
-            layoutParams = LinearLayout.LayoutParams(0, 64, 1f).apply {
-                setMargins(4, 4, 4, 4)
-            }
-            setOnClickListener {
-                handlePinInput()
-            }
-        }
-        row4.addView(btnConfirm)
-
-        panel.addView(row4)
+        panel.addView(etPin)
 
         // 错误提示
         tvError = TextView(requireContext()).apply {
@@ -189,12 +88,43 @@ class PinDialog(
             textSize = 14f
             setTextColor(Color.RED)
             gravity = Gravity.CENTER
-            setPadding(0, 12, 0, 0)
+            setPadding(0, 0, 0, 16)
         }
         panel.addView(tvError)
 
-        root.addView(panel)
-        return root
+        // 清除按钮
+        val btnClear = Button(requireContext()).apply {
+            text = "清除"
+            textSize = 18f
+            setTextColor(Color.RED)
+            setBackgroundColor(Color.parseColor("#FFEAEA"))
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 56
+            ).apply { setMargins(0, 0, 0, 8) }
+            setOnClickListener {
+                currentInput = ""
+                etPin.setText("")
+                tvError.text = ""
+            }
+        }
+        panel.addView(btnClear)
+
+        // 确认按钮
+        val btnConfirm = Button(requireContext()).apply {
+            text = "✓ 确认"
+            textSize = 18f
+            setTextColor(Color.WHITE)
+            setBackgroundColor(Color.parseColor("#2196F3"))
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 56
+            )
+            setOnClickListener {
+                handlePinInput()
+            }
+        }
+        panel.addView(btnConfirm)
+
+        return panel
     }
 
     private fun updateDots() {

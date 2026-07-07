@@ -3,7 +3,7 @@
 
     <!-- Calibration screen -->
     <string name="calibration_title">距离校准</string>
-    <string name="calibration_hint">建议手机与面部距离35厘米（最低30厘米）&#10;正对摄像头，确保光线充足，面部清晰可见。</string>
+    <string name="calibration_hint">建议手机与面部距离35厘米（最低30厘米）\n正对摄像头，确保光线充足，面部清晰可见。</string>
     <string name="btn_calibrate">点击校准</string>
     <string name="calibrating">校准中…</string>
     <string name="calibration_success">校准成功！基准距离已记录。</string>

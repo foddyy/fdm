@@ -151,7 +151,8 @@ class CalibrationActivity : AppCompatActivity() {
     }
 
     private fun setStatusText(text: String) {
-        binding.tvStatus.text = text
+        // Status text removed from layout, but keep method for potential future use
+        android.util.Log.d("CalibrationActivity", text)
     }
 
     override fun onDestroy() {

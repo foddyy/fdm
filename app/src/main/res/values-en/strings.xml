@@ -3,7 +3,6 @@
 
     <!-- Calibration screen -->
     <string name="calibration_title">Distance Calibration</string>
-    <string name="calibration_instruction">Place your phone about 35cm from your face (no less than 30cm), facing the camera.</string>
     <string name="calibration_hint">Ensure good lighting and a clear view of your face.</string>
     <string name="btn_calibrate">Calibrate</string>
     <string name="calibrating">Calibrating…</string>

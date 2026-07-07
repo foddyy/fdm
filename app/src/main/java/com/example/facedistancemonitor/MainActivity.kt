@@ -63,25 +63,72 @@ class MainActivity : AppCompatActivity() {
             .contains("baseline_eye_distance_px")
 
         if (!isCalibrated) {
-            startActivity(Intent(this, CalibrationActivity::class.java))
+            // 未校准：先请求权限，再跳转校准
+            requestAllPermissions {
+                startActivity(Intent(this, CalibrationActivity::class.java))
+            }
         } else {
-            // 已校准过，检查PIN码
-            checkPin {
-                setupUI()
-                startDistanceUpdates()
+            // 已校准：先请求权限，再检查PIN码
+            requestAllPermissions {
+                checkPin {
+                    setupUI()
+                    startDistanceUpdates()
+                }
             }
         }
     }
     
-    /** 检查PIN码，通过后执行callback */
-    private fun checkPin(onSuccess: () -> Unit) {
+    /** 请求所有权限，完成后执行callback */
+    private fun requestAllPermissions(onComplete: () -> Unit) {
         val pinManager = PinManager(this)
+        
+        // 先完成PIN验证（如果有），再请求权限
         if (pinManager.isPinSet()) {
             PinDialog(PinDialog.Mode.VERIFY) {
-                onSuccess()
+                requestPermissionsInternal(onComplete)
             }.show(supportFragmentManager, "pin_dialog")
         } else {
-            onSuccess()
+            requestPermissionsInternal(onComplete)
+        }
+    }
+    
+    private fun requestPermissionsInternal(onComplete: () -> Unit) {
+        if (hasAllPermissions()) {
+            onComplete()
+        } else {
+            // 保存callback，权限回来后执行
+            _permissionCallback = onComplete
+            requestPermissions(getPermissionArray(), REQUEST_CODE_PERMISSIONS)
+        }
+    }
+    
+    private var _permissionCallback: (() -> Unit)? = null
+    private val permissionCallback: (() -> Unit)? get() = _permissionCallback
+    
+    private fun getPermissionArray(): Array<String> {
+        val list = mutableListOf<String>()
+        list.add(Manifest.permission.CAMERA)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            list.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        return list.toTypedArray()
+    }
+    
+    companion object {
+        private const val REQUEST_CODE_PERMISSIONS = 1001
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, grantResults)
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            permissionCallback?.let { callback ->
+                _permissionCallback = null
+                callback()
+            }
         }
     }
 

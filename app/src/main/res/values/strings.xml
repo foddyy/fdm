@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">远点</string>
+    <string name="app_name">爱眼</string>
 
     <!-- Calibration screen -->
     <string name="calibration_title">距离校准</string>
@@ -10,7 +10,6 @@
     <string name="calibration_failed">校准失败，请重试。</string>
 
     <!-- Main screen -->
-    <string name="main_title">远点</string>
     <string name="btn_start_monitor">开始监控</string>
     <string name="btn_stop_monitor">停止监控</string>
     <string name="btn_recalibrate">重新校准</string>
@@ -23,4 +22,7 @@
     <!-- Alert overlay -->
     <string name="alert_overlay_title">你离手机太近了！</string>
     <string name="alert_overlay_subtitle"></string>
+
+    <!-- Language switch -->
+    <string name="lang_switch">EN</string>
 </resources>

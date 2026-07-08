@@ -59,6 +59,9 @@ class MainActivity : AppCompatActivity() {
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())
         
+        // 恢复语言设置
+        restoreLanguage()
+        
         // 先检查是否已校准
         val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .contains("baseline_eye_distance_px")
@@ -112,6 +115,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var setupUICalled = false
+    
+    override fun onResume() {
+        super.onResume()
+        // 从校准界面返回时，确保UI和距离更新已启动
+        if (!setupUICalled) {
+            val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .contains("baseline_eye_distance_px")
+            
+            if (isCalibrated) {
+                setupUI()
+                startDistanceUpdates()
+                setupUICalled = true
+            }
+        }
+    }
+
     private fun setupUI() {
         if (!hasAllPermissions()) {
             requestPermissions()
@@ -129,6 +149,40 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnRecalibrate.setOnClickListener {
             startActivity(Intent(this, CalibrationActivity::class.java))
+        }
+
+        // 语言切换按钮
+        binding.btnLangSwitch.setOnClickListener {
+            toggleLanguage()
+        }
+    }
+
+    /** 切换中英文 */
+    private fun toggleLanguage() {
+        val newLocale = if (localeIsChinese()) "en" else "zh"
+        saveLanguage(newLocale)
+        recreate() // 重建Activity以刷新语言
+    }
+
+    private fun localeIsChinese(): Boolean {
+        return resources.configuration.locale.language == "zh"
+    }
+
+    private fun saveLanguage(lang: String) {
+        getSharedPreferences("app_prefs", MODE_PRIVATE)
+            .edit()
+            .putString("app_locale", lang)
+            .apply()
+    }
+
+    private fun restoreLanguage() {
+        val lang = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            .getString("app_locale", null)
+        if (lang != null) {
+            val locale = android.util.Locale(lang)
+            val config = resources.configuration
+            config.setLocale(locale)
+            resources.updateConfiguration(config, resources.displayMetrics)
         }
     }
 
@@ -215,10 +269,11 @@ class MainActivity : AppCompatActivity() {
             startMonitoring()
         }
         
-        // Stop distance updates
+        // 停止距离更新
         distanceUpdateRunnable?.let { 
             distanceUpdateHandler.removeCallbacks(it)
         }
+        distanceUpdateRunnable = null
     }
     
     private fun startDistanceUpdates() {

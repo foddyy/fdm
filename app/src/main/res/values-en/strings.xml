@@ -1,16 +1,15 @@
 <resources>
-    <string name="app_name">Little Farther</string>
+    <string name="app_name">Care Eyes</string>
 
     <!-- Calibration screen -->
     <string name="calibration_title">Distance Calibration</string>
-    <string name="calibration_hint">Ensure good lighting and a clear view of your face.</string>
+    <string name="calibration_hint">Keep your phone about 35cm (min 30cm) from your face.\nFace the camera directly with good lighting for clear detection.</string>
     <string name="btn_calibrate">Calibrate</string>
     <string name="calibrating">Calibrating…</string>
     <string name="calibration_success">Calibration successful!</string>
     <string name="calibration_failed">Calibration failed, please try again.</string>
 
     <!-- Main screen -->
-    <string name="main_title">Little Farther</string>
     <string name="btn_start_monitor">Start Monitoring</string>
     <string name="btn_stop_monitor">Stop Monitoring</string>
     <string name="btn_recalibrate">Re-calibrate</string>
@@ -23,4 +22,7 @@
     <!-- Alert overlay -->
     <string name="alert_overlay_title">You\'re Too Close!</string>
     <string name="alert_overlay_subtitle"></string>
+
+    <!-- Language switch -->
+    <string name="lang_switch">中文</string>
 </resources>

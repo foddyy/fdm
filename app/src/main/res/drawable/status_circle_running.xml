@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Running state: green glass circle with gradient and inner glow -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
-    <solid android:color="#44AA44" />
+    <gradient
+        android:type="radial"
+        android:gradientRadius="50%"
+        android:centerX="0.4"
+        android:centerY="0.35"
+        android:startColor="#A5D6A7"
+        android:centerColor="#66BB6A"
+        android:endColor="#43A047" />
+    <stroke
+        android:width="3dp"
+        android:color="#2E7D32" />
+    <corners android:radius="50dp" />
+    <size android:width="100dp" android:height="100dp" />
 </shape>

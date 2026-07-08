@@ -187,6 +187,7 @@ class DistanceMonitorService : LifecycleService() {
                 stopMonitoring()
                 stopRestReminder()
                 stopSelf()
+                return START_NOT_STICKY
             }
             "ACTION_RESTART_CAMERA" -> {
                 // 横竖屏切换时重启相机
@@ -361,6 +362,14 @@ class DistanceMonitorService : LifecycleService() {
         consecutiveNearCount = 0
         lastFrameTimeMs = 0
         stopRedBlinkAlert()
+        
+        // 停止相机
+        try {
+            val cameraProvider = ProcessCameraProvider.getInstance(applicationContext).get()
+            cameraProvider.unbindAll()
+        } catch (e: Exception) {
+            android.util.Log.w("DistanceMonitorService", "Failed to unbind camera", e)
+        }
     }
 
     override fun onDestroy() {

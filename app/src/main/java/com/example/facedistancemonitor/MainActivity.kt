@@ -179,7 +179,7 @@ class MainActivity : AppCompatActivity() {
         val lang = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .getString("app_locale", null)
         if (lang != null) {
-            val locale = android.util.Locale(lang)
+            val locale = java.util.Locale(lang)
             val config = resources.configuration
             config.setLocale(locale)
             resources.updateConfiguration(config, resources.displayMetrics)

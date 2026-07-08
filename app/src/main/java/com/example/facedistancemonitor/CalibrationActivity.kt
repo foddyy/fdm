@@ -164,10 +164,11 @@ class CalibrationActivity : AppCompatActivity() {
                     PinDialog(PinDialog.Mode.SET) {
                         android.util.Log.d("CalibrationActivity", "PIN码已设置")
                     }.show(supportFragmentManager, "pin_dialog")
+                } else {
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        finish()
+                    }, 500)
                 }
-                Handler(Looper.getMainLooper()).postDelayed({
-                    finish()
-                }, 500)
             } else {
                 setStatusText("校准失败：未检测到足够的人脸数据")
                 binding.btnCalibrate.isEnabled = true

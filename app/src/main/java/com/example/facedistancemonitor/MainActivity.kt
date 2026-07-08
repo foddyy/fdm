@@ -59,34 +59,21 @@ class MainActivity : AppCompatActivity() {
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())
         
+        // 先检查是否已校准
         val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .contains("baseline_eye_distance_px")
-
+        
         if (!isCalibrated) {
-            // 未校准：先请求权限，再跳转校准
+            // 未校准：跳转校准界面
             requestAllPermissions {
                 startActivity(Intent(this, CalibrationActivity::class.java))
             }
         } else {
-            // 已校准：先检查PIN码，再请求权限
-            checkPin {
-                requestAllPermissions {
-                    setupUI()
-                    startDistanceUpdates()
-                }
+            // 已校准：请求权限后启动
+            requestAllPermissions {
+                setupUI()
+                startDistanceUpdates()
             }
-        }
-    }
-    
-    /** 检查PIN码，通过后执行callback */
-    private fun checkPin(onSuccess: () -> Unit) {
-        val pinManager = PinManager(this)
-        if (pinManager.isPinSet()) {
-            PinDialog(PinDialog.Mode.VERIFY) {
-                onSuccess()
-            }.show(supportFragmentManager, "pin_dialog")
-        } else {
-            onSuccess()
         }
     }
     

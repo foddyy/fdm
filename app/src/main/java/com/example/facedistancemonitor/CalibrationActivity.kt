@@ -159,16 +159,10 @@ class CalibrationActivity : AppCompatActivity() {
                 setStatusText("校准成功！基准双眼间距: ${avgDistance.toInt()} px")
                 binding.btnCalibrate.isEnabled = true
 
-                // 只在首次校准时提示设置PIN码
-                if (!PinManager(this).isPinSet()) {
-                    PinDialog(PinDialog.Mode.SET) {
-                        android.util.Log.d("CalibrationActivity", "PIN码已设置")
-                    }.show(supportFragmentManager, "pin_dialog")
-                } else {
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        finish()
-                    }, 500)
-                }
+                // 校准成功后关闭界面
+                Handler(Looper.getMainLooper()).postDelayed({
+                    finish()
+                }, 500)
             } else {
                 setStatusText("校准失败：未检测到足够的人脸数据")
                 binding.btnCalibrate.isEnabled = true

@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.facedistancemonitor.databinding.ActivityMainBinding
@@ -25,6 +26,29 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val REQUEST_CODE_PERMISSIONS = 100
         const val REQUEST_CODE_OVERLAY_PERMISSION = 101
+    }
+
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            Toast.makeText(this, "所有权限已授予", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "需要权限才能运行此应用", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private val overlayPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, "悬浮窗权限已授予", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "需要悬浮窗权限以显示警示", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,10 +109,6 @@ class MainActivity : AppCompatActivity() {
             list.add(Manifest.permission.POST_NOTIFICATIONS)
         }
         return list.toTypedArray()
-    }
-    
-    companion object {
-        private const val REQUEST_CODE_PERMISSIONS = 1001
     }
 
     override fun onRequestPermissionsResult(

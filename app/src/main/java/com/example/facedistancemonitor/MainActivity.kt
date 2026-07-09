@@ -171,24 +171,8 @@ class MainActivity : AppCompatActivity() {
         val newLocale = if (localeIsChinese()) "en" else "zh"
         saveLanguage(newLocale)
         
-        // 保存监控状态
-        val wasMonitoring = serviceRunning
-        
-        // 重建Activity以刷新语言
-        recreate()
-        
-        // 如果之前在监控，恢复UI状态
-        if (wasMonitoring) {
-            binding.tvStatusText.text = getString(R.string.status_running)
-            binding.viewStatusCircle.background = ContextCompat.getDrawable(
-                this, R.drawable.status_led_running
-            )
-            binding.btnStartMonitor.text = getString(R.string.btn_stop_monitor)
-            serviceRunning = true
-        }
-        
-        // 更新语言按钮文本
-        updateLangButtonText()
+        // 不重建Activity，直接更新UI文本
+        refreshAllText()
     }
 
     private fun localeIsChinese(): Boolean {
@@ -211,6 +195,14 @@ class MainActivity : AppCompatActivity() {
             config.setLocale(locale)
             resources.updateConfiguration(config, resources.displayMetrics)
         }
+    }
+    
+    /** 更新所有UI文本（用于语言切换时） */
+    private fun refreshAllText() {
+        binding.tvStatusText.text = if (serviceRunning) getString(R.string.status_running) else getString(R.string.status_idle)
+        binding.btnStartMonitor.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
+        binding.btnRecalibrate.text = getString(R.string.btn_recalibrate)
+        updateLangButtonText()
     }
 
     private fun hasAllPermissions(): Boolean {

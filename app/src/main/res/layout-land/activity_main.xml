@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Landscape layout: side-by-side design -->
+<!-- Landscape layout: left panel for controls, right panel for tip -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:background="#FFFFFF">
 
-    <!-- Left Panel: Status & Controls -->
+    <!-- Left Panel: Controls & Status -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -55,11 +55,11 @@
                 android:paddingEnd="12dp" />
         </LinearLayout>
 
-        <!-- LED Indicator -->
+        <!-- LED Indicator (larger) -->
         <View
             android:id="@+id/viewStatusCircle"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:background="@drawable/status_led_idle"
             android:layout_marginBottom="12dp" />
 
@@ -114,21 +114,28 @@
             android:layout_marginBottom="12dp" />
     </LinearLayout>
 
-    <!-- Right Panel: Camera Preview (placeholder) -->
-    <FrameLayout
+    <!-- Right Panel: Tip QR Code -->
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="#F5F5F5"
-        android:gravity="center">
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="摄像头预览区域"
+            android:text="打赏作者"
             android:textColor="#999999"
-            android:textSize="16sp"
-            android:layout_gravity="center" />
-    </FrameLayout>
+            android:textSize="14sp"
+            android:layout_marginBottom="16dp" />
+
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/ic_tip_qr"
+            android:contentDescription="打赏码" />
+    </LinearLayout>
 
 </LinearLayout>

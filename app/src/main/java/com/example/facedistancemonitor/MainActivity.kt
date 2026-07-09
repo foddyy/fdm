@@ -152,17 +152,43 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, CalibrationActivity::class.java))
         }
 
+        // 设置语言按钮初始文本
+        updateLangButtonText()
+        
         // 语言切换按钮
         binding.btnLangSwitch.setOnClickListener {
             toggleLanguage()
         }
+    }
+    
+    /** 更新语言按钮文本 */
+    private fun updateLangButtonText() {
+        binding.btnLangSwitch.text = if (localeIsChinese()) "EN" else "中文"
     }
 
     /** 切换中英文 */
     private fun toggleLanguage() {
         val newLocale = if (localeIsChinese()) "en" else "zh"
         saveLanguage(newLocale)
-        recreate() // 重建Activity以刷新语言（不停止监控）
+        
+        // 保存监控状态
+        val wasMonitoring = serviceRunning
+        
+        // 重建Activity以刷新语言
+        recreate()
+        
+        // 如果之前在监控，恢复UI状态
+        if (wasMonitoring) {
+            binding.tvStatusText.text = getString(R.string.status_running)
+            binding.viewStatusCircle.background = ContextCompat.getDrawable(
+                this, R.drawable.status_led_running
+            )
+            binding.btnStartMonitor.text = getString(R.string.btn_stop_monitor)
+            serviceRunning = true
+        }
+        
+        // 更新语言按钮文本
+        updateLangButtonText()
     }
 
     private fun localeIsChinese(): Boolean {

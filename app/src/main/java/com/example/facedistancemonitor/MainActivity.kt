@@ -53,14 +53,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // 先恢复语言设置（必须在setContentView之前）
+        restoreLanguage()
+        
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())
-        
-        // 恢复语言设置
-        restoreLanguage()
         
         // 先检查是否已校准
         val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)

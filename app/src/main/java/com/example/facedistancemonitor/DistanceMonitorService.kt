@@ -64,10 +64,10 @@ class DistanceMonitorService : LifecycleService() {
     private var tts: TextToSpeech? = null
     private var ttsInitialized = false
     
-    // 休息计时器：每20分钟提醒一次
+    // 休息计时器：检测到人脸满20分钟才提醒
     private val restReminderHandler = Handler(Looper.getMainLooper())
     private var restReminderRunnable: Runnable? = null
-    private var lastRestReminderTime = 0L
+    private var lastFaceDetectedTime = 0L  // 上次检测到人脸的时间
     private val REST_REMINDER_INTERVAL_MS = 20 * 60 * 1000L // 20分钟
     
     override fun onCreate() {
@@ -100,11 +100,12 @@ class DistanceMonitorService : LifecycleService() {
     private fun startRestReminder() {
         restReminderRunnable = Runnable {
             val now = System.currentTimeMillis()
-            if (now - lastRestReminderTime >= REST_REMINDER_INTERVAL_MS && isMonitoring) {
+            // 只有检测到人脸且满20分钟才提醒
+            if (lastFaceDetectedTime > 0 && now - lastFaceDetectedTime >= REST_REMINDER_INTERVAL_MS && isMonitoring) {
                 speakText("休息一下眼睛吧，看看远方")
-                lastRestReminderTime = now
+                lastFaceDetectedTime = now  // 重置计时
             }
-            // 每20分钟循环一次
+            // 每20分钟循环检查一次
             restReminderHandler.postDelayed(restReminderRunnable!!, REST_REMINDER_INTERVAL_MS)
         }
         restReminderHandler.post(restReminderRunnable!!)
@@ -136,8 +137,8 @@ class DistanceMonitorService : LifecycleService() {
         )
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("面部距离监控")
-            .setContentText("正在监测面部与屏幕距离")
+            .setContentTitle("爱眼")
+            .setContentText("正在守护你的眼睛")
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -186,6 +187,7 @@ class DistanceMonitorService : LifecycleService() {
             "ACTION_STOP_MONITORING" -> {
                 stopMonitoring()
                 stopRestReminder()
+                // 确保完全停止
                 stopSelf()
                 return START_NOT_STICKY
             }
@@ -283,6 +285,9 @@ class DistanceMonitorService : LifecycleService() {
         faceDetector?.process(inputImage)
             ?.addOnSuccessListener { faces ->
                 if (isMonitoring && faces.isNotEmpty()) {
+                    // 检测到人脸，更新计时起点
+                    lastFaceDetectedTime = System.currentTimeMillis()
+                    
                     val face = faces[0]
                     val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)
                     val rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE)
@@ -316,6 +321,9 @@ class DistanceMonitorService : LifecycleService() {
                             stopRedBlinkAlert()
                         }
                     }
+                } else if (isMonitoring && faces.isEmpty()) {
+                    // 未检测到人脸，重置计时器
+                    lastFaceDetectedTime = 0L
                 }
             }
             ?.addOnFailureListener { e ->

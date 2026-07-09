@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity() {
     private fun toggleLanguage() {
         val newLocale = if (localeIsChinese()) "en" else "zh"
         saveLanguage(newLocale)
-        recreate() // 重建Activity以刷新语言
+        recreate() // 重建Activity以刷新语言（不停止监控）
     }
 
     private fun localeIsChinese(): Boolean {
@@ -245,7 +245,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.tvStatusText.text = getString(R.string.status_running)
         binding.viewStatusCircle.background = ContextCompat.getDrawable(
-            this, R.drawable.status_circle_running
+            this, R.drawable.status_led_running
         )
         binding.btnStartMonitor.text = getString(R.string.btn_stop_monitor)
         serviceRunning = true
@@ -262,7 +262,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.tvStatusText.text = getString(R.string.status_idle)
         binding.viewStatusCircle.background = ContextCompat.getDrawable(
-            this, R.drawable.status_circle_idle
+            this, R.drawable.status_led_idle
         )
         binding.btnStartMonitor.text = getString(R.string.btn_start_monitor)
         serviceRunning = false

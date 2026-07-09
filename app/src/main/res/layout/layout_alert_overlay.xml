@@ -3,7 +3,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#80CCCCCC">
+    android:background="@android:color/transparent">
 
     <!-- Top Red Bar -->
     <View
@@ -39,15 +39,16 @@
         android:background="@color/red"
         android:alpha="0" />
 
-    <!-- Center Warning Text -->
+    <!-- Center Warning Text with Frosted Glass Effect -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="#E6FFFFFF"
-        android:padding="24dp">
+        android:background="#99000000"
+        android:padding="24dp"
+        android:layout_margin="48dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -60,7 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/alert_overlay_title"
-            android:textColor="#FF0000"
+            android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
             android:gravity="center" />

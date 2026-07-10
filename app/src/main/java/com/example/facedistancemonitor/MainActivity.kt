@@ -171,7 +171,13 @@ class MainActivity : AppCompatActivity() {
         val newLocale = if (localeIsChinese()) "en" else "zh"
         saveLanguage(newLocale)
         
-        // 不重建Activity，直接更新UI文本
+        // 更新资源配置（关键！否则 getString 仍返回旧语言）
+        val locale = java.util.Locale(newLocale)
+        val config = resources.configuration
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
+        
+        // 更新UI文本
         refreshAllText()
     }
 

@@ -3,26 +3,9 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-// 生成调试密钥库（如果不存在）
-val debugKeyStore = file("$rootDir/debug.keystore")
-if (!debugKeyStore.exists()) {
-    exec {
-        commandLine("keytool", "-genkeypair", "-v", "-storetype", "JKS", "-keystore", debugKeyStore.absolutePath, "-alias", "androiddebugkey", "-keyalg", "RSA", "-keysize", "2048", "-validity", "10000", "-storepass", "android", "-keypass", "android", "-dname", "CN=Android Debug,O=Android,C=US")
-    }
-}
-
 android {
     namespace = "com.example.facedistancemonitor"
     compileSdk = 34
-
-    signingConfigs {
-        create("debug") {
-            storeFile = debugKeyStore
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
-        }
-    }
 
     defaultConfig {
         applicationId = "com.example.facedistancemonitor"
@@ -35,9 +18,6 @@ android {
     }
 
     buildTypes {
-        debug {
-            signingConfig = signingConfigs.getByName("debug")
-        }
         release {
             isMinifyEnabled = false
             proguardFiles(

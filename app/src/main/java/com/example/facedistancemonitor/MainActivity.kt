@@ -120,6 +120,10 @@ class MainActivity : AppCompatActivity() {
     
     override fun onResume() {
         super.onResume()
+        
+        // 同步Service真实运行状态到UI（关键！Activity重建后serviceRunning被重置为false）
+        syncServiceStateToUI()
+        
         // 从校准界面返回时，确保UI和距离更新已启动
         if (!setupUICalled) {
             val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)
@@ -129,6 +133,27 @@ class MainActivity : AppCompatActivity() {
                 setupUI()
                 startDistanceUpdates()
                 setupUICalled = true
+            }
+        }
+    }
+    
+    /** 同步Service真实运行状态到UI */
+    private fun syncServiceStateToUI() {
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val actuallyRunning = prefs.getBoolean("service_monitoring", false)
+        
+        if (actuallyRunning != serviceRunning) {
+            serviceRunning = actuallyRunning
+            if (serviceRunning) {
+                binding.tvStatusText.text = getString(R.string.status_running)
+                binding.viewStatusCircle.background = ContextCompat.getDrawable(this, R.drawable.status_led_running)
+                binding.btnStartMonitor.text = getString(R.string.btn_stop_monitor)
+                binding.btnStartMonitor.setOnClickListener { stopMonitoring() }
+            } else {
+                binding.tvStatusText.text = getString(R.string.status_idle)
+                binding.viewStatusCircle.background = ContextCompat.getDrawable(this, R.drawable.status_led_idle)
+                binding.btnStartMonitor.text = getString(R.string.btn_start_monitor)
+                binding.btnStartMonitor.setOnClickListener { startMonitoring() }
             }
         }
     }

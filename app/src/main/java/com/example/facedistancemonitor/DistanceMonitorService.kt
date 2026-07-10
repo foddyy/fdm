@@ -178,6 +178,10 @@ class DistanceMonitorService : LifecycleService() {
 
                 if (baselineEyeDistancePx > 0) {
                     isMonitoring = true
+                    // 持久化监控状态到SharedPreferences，供Activity重建时同步
+                    getSharedPreferences("app_prefs", MODE_PRIVATE).edit()
+                        .putBoolean("service_monitoring", true)
+                        .apply()
                     startCameraMonitoring()
                     startRestReminder()
                 } else {
@@ -187,6 +191,10 @@ class DistanceMonitorService : LifecycleService() {
             "ACTION_STOP_MONITORING" -> {
                 stopMonitoring()
                 stopRestReminder()
+                // 清除持久化监控状态
+                getSharedPreferences("app_prefs", MODE_PRIVATE).edit()
+                    .remove("service_monitoring")
+                    .apply()
                 // 确保完全停止
                 stopSelf()
                 return START_NOT_STICKY

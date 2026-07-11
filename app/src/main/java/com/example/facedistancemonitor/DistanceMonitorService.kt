@@ -346,6 +346,16 @@ class DistanceMonitorService : LifecycleService() {
         isAlertActive = true
 
         alertView = ViewAlertOverlay(this)
+        
+        // 根据当前语言设置正确的标题
+        val currentLang = resources.configuration.locale.language
+        val titleResId = if (currentLang == "en") {
+            R.string.alert_overlay_title_en
+        } else {
+            R.string.alert_overlay_title_zh
+        }
+        alertView.setAlertTitle(titleResId)
+        
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,

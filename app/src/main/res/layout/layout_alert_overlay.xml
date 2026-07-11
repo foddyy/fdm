@@ -39,30 +39,33 @@
         android:background="@color/red"
         android:alpha="0" />
 
-    <!-- Center Warning Text with Frosted Glass Effect -->
+    <!-- Center Warning Card with Red Glow Effect -->
     <LinearLayout
+        android:id="@+id/alertCard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="#99000000"
-        android:padding="24dp"
+        android:background="@drawable/alert_card_background"
+        android:padding="32dp"
         android:layout_margin="48dp">
 
         <TextView
+            android:id="@+id/alertIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="⚠️"
-            android:textSize="48sp"
-            android:layout_marginBottom="8dp" />
+            android:textSize="56sp"
+            android:layout_marginBottom="12dp" />
 
         <TextView
+            android:id="@+id/alertTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/alert_overlay_title"
+            android:text=""
             android:textColor="#FFFFFF"
-            android:textSize="24sp"
+            android:textSize="26sp"
             android:textStyle="bold"
             android:gravity="center" />
 

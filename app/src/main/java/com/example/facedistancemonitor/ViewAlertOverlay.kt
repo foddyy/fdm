@@ -22,6 +22,11 @@ class ViewAlertOverlay @JvmOverloads constructor(
         setupBorderAnimations()
     }
 
+    /** 设置警示标题（支持多语言） */
+    fun setAlertTitle(titleResId: Int) {
+        binding.alertTitle.text = context.getString(titleResId)
+    }
+
     private fun setupBorderAnimations() {
         val views = listOf(
             binding.alertTop,

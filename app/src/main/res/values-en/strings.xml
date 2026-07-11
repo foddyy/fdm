@@ -20,7 +20,7 @@
     <string name="threshold_info">Threshold: 35 cm</string>
 
     <!-- Alert overlay -->
-    <string name="alert_overlay_title_en">You&apos;re Too Close!</string>
+    <string name="alert_overlay_title_en">You're Too Close!</string>
     <string name="alert_overlay_title_zh">你离手机太近了！</string>
     <string name="alert_overlay_subtitle"></string>
 

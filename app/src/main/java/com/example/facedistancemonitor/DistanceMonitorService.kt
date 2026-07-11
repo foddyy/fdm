@@ -354,7 +354,8 @@ class DistanceMonitorService : LifecycleService() {
         } else {
             R.string.alert_overlay_title_zh
         }
-        alertView.setAlertTitle(titleResId)
+        val overlay = alertView!!
+        overlay.setAlertTitle(titleResId)
         
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,

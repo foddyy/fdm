@@ -202,9 +202,10 @@ class DistanceMonitorService : LifecycleService() {
                 return START_NOT_STICKY
             }
             "ACTION_RESTART_CAMERA" -> {
-                // 横竖屏切换时重启相机，确保帧分析继续工作
-                // 因为 CameraX 绑定到 Activity 生命周期，旋转后需要重新绑定
-                restartCamera()
+                // 横竖屏切换时不需要重启相机
+                // CameraX binding survives rotation because we set configChanges in manifest
+                // Calling unbindAll() + bindToLifecycle causes frame processing gap = missed detections
+                android.util.Log.d("DistanceMonitorService", "Orientation changed, camera binding persists")
             }
         }
         return START_STICKY

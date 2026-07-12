@@ -142,8 +142,16 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         val actuallyRunning = prefs.getBoolean("service_monitoring", false)
         
-        if (actuallyRunning != serviceRunning) {
-            serviceRunning = actuallyRunning
+        // 修复问题3：杀进程重启后，不能只看SharedPreferences，还要检查相机是否真的在工作
+        // 如果相机状态不是ready或error，说明相机已断开，实际没有在监控
+        val cameraStatus = distanceDataStore.getCameraStatus()
+        val cameraActuallyWorking = cameraStatus == "ready" || cameraStatus.startsWith("processed")
+        
+        // 如果SharedPreferences说在监控但相机没工作，说明是假状态，重置为空闲
+        val realRunning = actuallyRunning && cameraActuallyWorking
+        
+        if (realRunning != serviceRunning) {
+            serviceRunning = realRunning
             if (serviceRunning) {
                 binding.tvStatusText.text = getString(R.string.status_running)
                 binding.viewStatusCircle.background = ContextCompat.getDrawable(this, R.drawable.status_led_running)

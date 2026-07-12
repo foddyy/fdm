@@ -203,7 +203,9 @@ class DistanceMonitorService : LifecycleService() {
             }
             "ACTION_RESTART_CAMERA" -> {
                 // 横竖屏切换时重启相机，确保帧分析继续工作
-                restartCamera()
+                if (isMonitoring) {
+                    restartCamera()
+                }
             }
         }
         return START_STICKY

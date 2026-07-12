@@ -57,8 +57,10 @@ class DistanceMonitorService : LifecycleService() {
     // 降频控制：记录上次处理帧的时间戳
     private var lastFrameTimeMs = 0L
     
-    // 连续过近计数
-    private var consecutiveNearCount = 0
+    // 报警触发计数器：连续检测到过近才报警（避免偶发误报）
+    private var nearCounter = 0
+    // 报警取消计数器：报警激活后连续正常才取消（防止ML Kit抖动误关）
+    private var clearCounter = 0
     
     // 语音TTS
     private var tts: TextToSpeech? = null
@@ -200,10 +202,10 @@ class DistanceMonitorService : LifecycleService() {
                 return START_NOT_STICKY
             }
             "ACTION_RESTART_CAMERA" -> {
-                // 横竖屏切换时重启相机
-                if (isMonitoring) {
-                    restartCamera()
-                }
+                // 横竖屏切换时不需要重启相机
+                // CameraX binding survives rotation because we set configChanges in manifest
+                // Calling unbindAll() + bindToLifecycle causes frame processing gap = missed detections
+                android.util.Log.d("DistanceMonitorService", "Orientation changed, camera binding persists")
             }
         }
         return START_STICKY
@@ -311,23 +313,33 @@ class DistanceMonitorService : LifecycleService() {
                             baselineEyeDistancePx / currentEyeDistancePx).toInt()
 
                         val isNear = estimatedDistanceCm < THRESHOLD_DISTANCE_CM
-                        if (isNear) {
-                            consecutiveNearCount++
+                        
+                        // 使用独立计数器：nearCounter 用于触发报警，clearCounter 用于取消报警
+                        if (isAlertActive) {
+                            // 报警已激活：用 clearCounter 追踪连续正常帧
+                            if (isNear) {
+                                clearCounter = 0  // 又变近了，重置取消计数
+                            } else {
+                                clearCounter++
+                                if (clearCounter >= CONSECUTIVE_NEAR_COUNT) {
+                                    stopRedBlinkAlert()
+                                }
+                            }
                         } else {
-                            consecutiveNearCount = 0
+                            // 报警未激活：用 nearCounter 追踪连续过近帧
+                            if (isNear) {
+                                nearCounter++
+                                if (nearCounter >= CONSECUTIVE_NEAR_COUNT) {
+                                    startRedBlinkAlert()
+                                }
+                            } else {
+                                nearCounter = 0
+                            }
                         }
 
                         // 保存距离数据供UI更新
                         distanceDataStore.saveDistance(estimatedDistanceCm)
                         lastReportedDistance = estimatedDistanceCm
-
-                        // 连续两次过近才报警
-                        if (isNear && consecutiveNearCount >= CONSECUTIVE_NEAR_COUNT && !isAlertActive) {
-                            startRedBlinkAlert()
-                        } else if (!isNear && isAlertActive && consecutiveNearCount == 0) {
-                            // 连续两次正常才取消报警
-                            stopRedBlinkAlert()
-                        }
                     }
                 } else if (isMonitoring && faces.isEmpty()) {
                     // 未检测到人脸，重置计时器
@@ -386,7 +398,8 @@ class DistanceMonitorService : LifecycleService() {
 
     private fun stopMonitoring() {
         isMonitoring = false
-        consecutiveNearCount = 0
+        nearCounter = 0
+        clearCounter = 0
         lastFrameTimeMs = 0
         stopRedBlinkAlert()
         

@@ -119,6 +119,18 @@ class MainActivity : AppCompatActivity() {
         // 修复问题3：同步Service真实运行状态到UI
         syncServiceStateToUI()
         
+        // 修复问题2：回到前台时如果Service在监控但相机未工作，重启相机
+        if (serviceRunning) {
+            val cameraStatus = distanceDataStore.getCameraStatus()
+            if (cameraStatus != "ready") {
+                android.util.Log.d("MainActivity", "Restarting camera on resume, current status: $cameraStatus")
+                val intent = Intent(this, DistanceMonitorService::class.java).apply {
+                    action = "ACTION_RESTART_CAMERA"
+                }
+                startService(intent)
+            }
+        }
+        
         if (!setupUICalled) {
             val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .contains("baseline_eye_distance_px")

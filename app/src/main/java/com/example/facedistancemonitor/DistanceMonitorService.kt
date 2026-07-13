@@ -334,14 +334,16 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                                 clearCounter = 0
                             } else {
                                 clearCounter++
-                                if (clearCounter >= CONSECUTIVE_NEAR_COUNT) {
+                                // 修复：只要连续1帧正常就关闭警示（原来是2）
+                                if (clearCounter >= 1) {
                                     stopRedBlinkAlert()
                                 }
                             }
                         } else {
                             if (isNear) {
                                 nearCounter++
-                                if (nearCounter >= CONSECUTIVE_NEAR_COUNT) {
+                                // 修复：连续1帧检测到近就弹窗（原来是2，太快了）
+                                if (nearCounter >= 1) {
                                     startRedBlinkAlert()
                                 }
                             } else {
@@ -354,6 +356,10 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                     }
                 } else if (isMonitoring && faces.isEmpty()) {
                     lastFaceDetectedTime = 0L
+                    // 修复：人脸丢失时也清除警示
+                    if (isAlertActive) {
+                        stopRedBlinkAlert()
+                    }
                 }
             }
             ?.addOnFailureListener { e ->

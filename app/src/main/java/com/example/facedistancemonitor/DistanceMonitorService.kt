@@ -82,6 +82,9 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
         displayManager.registerDisplayListener(this, null)
         
+        // 修复问题3：Service重建时重置相机状态，防止UI假死
+        distanceDataStore.markCameraStatus("none")
+        
         startForegroundService()
     }
     

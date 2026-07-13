@@ -38,6 +38,10 @@ class DistanceDataStore(private val context: Context) {
         prefs.edit().putString("camera_status", "error:$msg").apply()
     }
     
+    fun markCameraStatus(status: String) {
+        prefs.edit().putString("camera_status", status).apply()
+    }
+    
     fun getCameraStatus(): String {
         return prefs.getString("camera_status", "none") ?: "none"
     }

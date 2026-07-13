@@ -42,7 +42,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     }
 
     private var faceDetector: FaceDetector? = null
-    private lateinit var cameraExecutor: Executors.newSingleThreadExecutor()
+    private lateinit var cameraExecutor: ExecutorService
     private var isMonitoring = false
     private var baselineEyeDistancePx: Float = 0f
 

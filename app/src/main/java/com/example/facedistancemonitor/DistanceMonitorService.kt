@@ -434,6 +434,10 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         } catch (e: Exception) {
             android.util.Log.w("DistanceMonitorService", "Failed to unregister display listener", e)
         }
+        // 修复问题3：Service被杀时清理监控标志，防止重启后UI假死
+        getSharedPreferences("app_prefs", MODE_PRIVATE).edit().remove("service_monitoring").apply()
+        distanceDataStore.markCameraStatus("none")
+        android.util.Log.d("DistanceMonitorService", "Service destroyed, cleared monitoring state")
     }
 
     override fun onBind(intent: Intent): IBinder? {

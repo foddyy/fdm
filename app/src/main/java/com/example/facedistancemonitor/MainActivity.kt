@@ -54,7 +54,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // 先恢复语言设置（必须在setContentView之前）
         restoreLanguage()
         
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -63,17 +62,14 @@ class MainActivity : AppCompatActivity() {
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())
         
-        // 先检查是否已校准
         val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .contains("baseline_eye_distance_px")
         
         if (!isCalibrated) {
-            // 未校准：跳转校准界面
             requestAllPermissions {
                 startActivity(Intent(this, CalibrationActivity::class.java))
             }
         } else {
-            // 已校准：请求权限后启动
             requestAllPermissions {
                 setupUI()
                 startDistanceUpdates()
@@ -81,7 +77,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    /** 请求所有权限 */
     private fun requestAllPermissions(onComplete: () -> Unit) {
         if (hasAllPermissions()) {
             onComplete()
@@ -121,10 +116,9 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         
-        // 同步Service真实运行状态到UI（关键！Activity重建后serviceRunning被重置为false）
+        // 修复问题3：同步Service真实运行状态到UI
         syncServiceStateToUI()
         
-        // 从校准界面返回时，确保UI和距离更新已启动
         if (!setupUICalled) {
             val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .contains("baseline_eye_distance_px")
@@ -142,10 +136,9 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         val actuallyRunning = prefs.getBoolean("service_monitoring", false)
         
-        // 修复问题3：杀进程重启后，不能只看SharedPreferences，还要检查相机是否真的在工作
-        // 如果相机状态不是ready或error，说明相机已断开，实际没有在监控
+        // 检查相机是否真的在工作
         val cameraStatus = distanceDataStore.getCameraStatus()
-        val cameraActuallyWorking = cameraStatus == "ready" || cameraStatus.startsWith("processed")
+        val cameraActuallyWorking = cameraStatus == "ready"
         
         // 如果SharedPreferences说在监控但相机没工作，说明是假状态，重置为空闲
         val realRunning = actuallyRunning && cameraActuallyWorking
@@ -185,32 +178,26 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, CalibrationActivity::class.java))
         }
 
-        // 设置语言按钮初始文本
         updateLangButtonText()
         
-        // 语言切换按钮
         binding.btnLangSwitch.setOnClickListener {
             toggleLanguage()
         }
     }
     
-    /** 更新语言按钮文本 */
     private fun updateLangButtonText() {
         binding.btnLangSwitch.text = if (localeIsChinese()) "EN" else "中文"
     }
 
-    /** 切换中英文 */
     private fun toggleLanguage() {
         val newLocale = if (localeIsChinese()) "en" else "zh"
         saveLanguage(newLocale)
         
-        // 更新资源配置（关键！否则 getString 仍返回旧语言）
         val locale = java.util.Locale(newLocale)
         val config = resources.configuration
         config.setLocale(locale)
         resources.updateConfiguration(config, resources.displayMetrics)
         
-        // 更新UI文本
         refreshAllText()
     }
 
@@ -236,7 +223,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    /** 更新所有UI文本（用于语言切换时） */
     private fun refreshAllText() {
         binding.tvStatusText.text = if (serviceRunning) getString(R.string.status_running) else getString(R.string.status_idle)
         binding.btnStartMonitor.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
@@ -327,7 +313,6 @@ class MainActivity : AppCompatActivity() {
             startMonitoring()
         }
         
-        // 停止距离更新
         distanceUpdateRunnable?.let { 
             distanceUpdateHandler.removeCallbacks(it)
         }
@@ -365,7 +350,6 @@ class MainActivity : AppCompatActivity() {
     
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
         super.onConfigurationChanged(newConfig)
-        // 横竖屏切换时通知Service重启相机
         val intent = Intent(this, DistanceMonitorService::class.java).apply {
             action = "ACTION_RESTART_CAMERA"
         }

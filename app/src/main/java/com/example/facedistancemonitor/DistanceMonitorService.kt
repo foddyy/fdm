@@ -238,6 +238,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                 
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setOutputImageRotation(true)
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
@@ -265,6 +266,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                 
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setOutputImageRotation(true)
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
@@ -362,13 +364,13 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         isAlertActive = true
         lastAlertStartTime = System.currentTimeMillis()  // 记录警示开始时间
         
-        // 启动5秒超时定时器：如果5秒内没有收到新的近距离信号，自动关闭警示
+        // 启动2秒超时定时器：如果2秒内没有收到新的近距离信号，自动关闭警示
         if (alertTimeoutHandler == null) {
             alertTimeoutHandler = Handler(Looper.getMainLooper())
         }
         alertTimeoutRunnable = Runnable {
             if (isAlertActive) {
-                android.util.Log.d("DistanceMonitorService", "Alert timeout: closing after 5s without near signal")
+                android.util.Log.d("DistanceMonitorService", "Alert timeout: closing after 2s without near signal")
                 stopRedBlinkAlert()
             }
         }

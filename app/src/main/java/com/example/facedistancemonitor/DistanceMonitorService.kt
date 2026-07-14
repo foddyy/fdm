@@ -307,7 +307,9 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         val rotationDegrees = imageProxy.imageInfo.rotationDegrees
         val inputImage = InputImage.fromMediaImage(mediaImage, rotationDegrees)
 
-        faceDetector?.process(inputImage)?.let { task ->
+        val detector = faceDetector
+        if (detector != null && mediaImage != null) {
+            val task = detector.process(inputImage)
             try {
                 // 同步等待ML Kit检测结果（后台也能可靠工作）
                 val faces = com.google.android.gms.tasks.Tasks.await(task, 5000L, java.util.concurrent.TimeUnit.MILLISECONDS)

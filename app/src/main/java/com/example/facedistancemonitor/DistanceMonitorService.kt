@@ -310,7 +310,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         faceDetector?.process(inputImage)?.let { task ->
             try {
                 // 同步等待ML Kit检测结果（后台也能可靠工作）
-                val faces = com.google.android.gms.tasks.Tasks.await(task, 5000L)
+                val faces = com.google.android.gms.tasks.Tasks.await(task, 5000L, java.util.concurrent.TimeUnit.MILLISECONDS)
                 
                 if (isMonitoring) {
                     if (faces.isNotEmpty()) {

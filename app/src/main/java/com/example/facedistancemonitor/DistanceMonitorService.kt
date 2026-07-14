@@ -56,6 +56,8 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     
     private var lastFrameTimeMs = 0L
     private var lastAlertStartTime = 0L  // 记录警示开始时间
+    private var alertTimeoutHandler: Handler? = null  // 警示超时定时器
+    private var alertTimeoutRunnable: Runnable? = null  // 警示超时回调
     
     private var tts: TextToSpeech? = null
     private var ttsInitialized = false
@@ -336,6 +338,9 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                         startRedBlinkAlert()
                     }
                     
+                    // 重置超时定时器：收到新的近距离信号说明ML Kit还在工作
+                    alertTimeoutHandler?.removeCallbacks(alertTimeoutRunnable!!)
+                    
                     distanceDataStore.saveDistance(estimatedDistanceCm)
                     lastReportedDistance = estimatedDistanceCm
                 }
@@ -356,6 +361,18 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     private fun startRedBlinkAlert() {
         isAlertActive = true
         lastAlertStartTime = System.currentTimeMillis()  // 记录警示开始时间
+        
+        // 启动5秒超时定时器：如果5秒内没有收到新的近距离信号，自动关闭警示
+        if (alertTimeoutHandler == null) {
+            alertTimeoutHandler = Handler(Looper.getMainLooper())
+        }
+        alertTimeoutRunnable = Runnable {
+            if (isAlertActive) {
+                android.util.Log.d("DistanceMonitorService", "Alert timeout: closing after 5s without near signal")
+                stopRedBlinkAlert()
+            }
+        }
+        alertTimeoutHandler!!.postDelayed(alertTimeoutRunnable!!, 2000L)
 
         alertView = ViewAlertOverlay(this)
         
@@ -389,6 +406,9 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     private fun stopRedBlinkAlert() {
         isAlertActive = false
         lastAlertStartTime = 0L
+        
+        // 取消超时定时器
+        alertTimeoutHandler?.removeCallbacks(alertTimeoutRunnable!!)
 
         alertView?.let { view ->
             windowManager?.removeView(view)

@@ -145,22 +145,10 @@ class MainActivity : AppCompatActivity() {
     
     /** 同步Service真实运行状态到UI */
     private fun syncServiceStateToUI() {
-        // 修复问题2：通过检查Service是否存活来判断真实状态
+        // 修复问题2：通过检查相机帧是否还在更新来判断Service是否真实存活
         // 不能只用SharedPreferences，因为Service被杀后SharedPreferences残留旧值
-        val intent = Intent(this, DistanceMonitorService::class.java).apply {
-            action = "ACTION_CHECK_STATUS"
-        }
-        try {
-            // 尝试绑定Service来检查是否存活
-            val bound = bindService(intent, null, 0)
-            if (bound) {
-                unbindService(null)
-            }
-        } catch (e: Exception) {
-            // Service不存在
-        }
+        // 如果相机状态为ready且超过10秒没有新帧，说明Service已经不工作了
         
-        // 检查相机帧是否还在更新（如果超过10秒没有新帧，说明Service已经不工作了）
         val lastFrame = distanceDataStore.getLastFrameTime()
         val cameraStatus = distanceDataStore.getCameraStatus()
         val now = System.currentTimeMillis()

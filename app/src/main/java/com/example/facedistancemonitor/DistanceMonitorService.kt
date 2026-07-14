@@ -55,8 +55,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     private var lastReportedDistance: Int = -1
     
     private var lastFrameTimeMs = 0L
-    private var nearCounter = 0
-    private var clearCounter = 0
+    private var lastAlertStartTime = 0L  // 记录警示开始时间
     
     private var tts: TextToSpeech? = null
     private var ttsInitialized = false
@@ -329,34 +328,25 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
 
                         val isNear = estimatedDistanceCm < THRESHOLD_DISTANCE_CM
                         
-                        if (isAlertActive) {
-                            if (isNear) {
-                                clearCounter = 0
-                            } else {
-                                clearCounter++
-                                // 修复：只要连续1帧正常就关闭警示（原来是2）
-                                if (clearCounter >= 1) {
-                                    stopRedBlinkAlert()
-                                }
-                            }
-                        } else {
-                            if (isNear) {
-                                nearCounter++
-                                // 修复：连续1帧检测到近就弹窗（原来是2，太快了）
-                                if (nearCounter >= 1) {
-                                    startRedBlinkAlert()
-                                }
-                            } else {
-                                nearCounter = 0
-                            }
+                        // 修复：直接在回调里处理警示开关，不依赖clearCounter/nearCounter
+                        // 因为ML Kit异步回调在后台不可靠，需要用更激进的方式
+                        if (isAlertActive && !isNear) {
+                            // 远离了就立即关警示
+                            stopRedBlinkAlert()
+                        } else if (!isAlertActive && isNear) {
+                            // 靠近了就立即开警示
+                            startRedBlinkAlert()
                         }
-
-                        distanceDataStore.saveDistance(estimatedDistanceCm)
-                        lastReportedDistance = estimatedDistanceCm
+                        
+                        // 只在弹窗状态下更新距离
+                        if (isAlertActive) {
+                            distanceDataStore.saveDistance(estimatedDistanceCm)
+                            lastReportedDistance = estimatedDistanceCm
+                        }
                     }
                 } else if (isMonitoring && faces.isEmpty()) {
                     lastFaceDetectedTime = 0L
-                    // 修复：人脸丢失时也清除警示
+                    // 人脸丢失时清除警示
                     if (isAlertActive) {
                         stopRedBlinkAlert()
                     }
@@ -372,6 +362,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
 
     private fun startRedBlinkAlert() {
         isAlertActive = true
+        lastAlertStartTime = System.currentTimeMillis()  // 记录警示开始时间
 
         alertView = ViewAlertOverlay(this)
         
@@ -404,6 +395,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
 
     private fun stopRedBlinkAlert() {
         isAlertActive = false
+        lastAlertStartTime = 0L
 
         alertView?.let { view ->
             windowManager?.removeView(view)
@@ -413,8 +405,6 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
 
     private fun stopMonitoring() {
         isMonitoring = false
-        nearCounter = 0
-        clearCounter = 0
         lastFrameTimeMs = 0
         stopRedBlinkAlert()
         

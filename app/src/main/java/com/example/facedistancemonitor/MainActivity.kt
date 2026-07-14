@@ -145,24 +145,44 @@ class MainActivity : AppCompatActivity() {
     
     /** 同步Service真实运行状态到UI */
     private fun syncServiceStateToUI() {
-        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-        val actuallyRunning = prefs.getBoolean("service_monitoring", false)
+        // 修复问题2：通过检查Service是否存活来判断真实状态
+        // 不能只用SharedPreferences，因为Service被杀后SharedPreferences残留旧值
+        val intent = Intent(this, DistanceMonitorService::class.java).apply {
+            action = "ACTION_CHECK_STATUS"
+        }
+        try {
+            // 尝试绑定Service来检查是否存活
+            val bound = bindService(intent, null, 0)
+            if (bound) {
+                unbindService(null)
+            }
+        } catch (e: Exception) {
+            // Service不存在
+        }
         
-        // 检查相机是否真的在工作
+        // 检查相机帧是否还在更新（如果超过10秒没有新帧，说明Service已经不工作了）
+        val lastFrame = distanceDataStore.getLastFrameTime()
         val cameraStatus = distanceDataStore.getCameraStatus()
-        val cameraActuallyWorking = cameraStatus == "ready"
+        val now = System.currentTimeMillis()
+        val frameAgeMs = if (lastFrame > 0) now - lastFrame else -1
         
-        // 如果SharedPreferences说在监控但相机没工作，说明是假状态，重置为空闲
-        val realRunning = actuallyRunning && cameraActuallyWorking
+        // 判断Service是否真的在监控：相机状态为ready 且 帧在10秒内有更新
+        val serviceActuallyWorking = cameraStatus == "ready" && (frameAgeMs < 0 || frameAgeMs < 10000)
         
-        if (realRunning != serviceRunning) {
-            serviceRunning = realRunning
+        if (serviceActuallyWorking != serviceRunning) {
+            serviceRunning = serviceActuallyWorking
             if (serviceRunning) {
                 binding.tvStatusText.text = getString(R.string.status_running)
                 binding.viewStatusCircle.background = ContextCompat.getDrawable(this, R.drawable.status_led_running)
                 binding.btnStartMonitor.text = getString(R.string.btn_stop_monitor)
                 binding.btnStartMonitor.setOnClickListener { stopMonitoring() }
             } else {
+                // Service已死，清理状态
+                getSharedPreferences("app_prefs", MODE_PRIVATE).edit()
+                    .remove("service_monitoring")
+                    .apply()
+                distanceDataStore.markCameraStatus("none")
+                
                 binding.tvStatusText.text = getString(R.string.status_idle)
                 binding.viewStatusCircle.background = ContextCompat.getDrawable(this, R.drawable.status_led_idle)
                 binding.btnStartMonitor.text = getString(R.string.btn_start_monitor)

@@ -307,59 +307,51 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         val rotationDegrees = imageProxy.imageInfo.rotationDegrees
         val inputImage = InputImage.fromMediaImage(mediaImage, rotationDegrees)
 
-        val detector = faceDetector
-        if (detector != null && mediaImage != null) {
-            val task = detector.process(inputImage)
-            try {
-                // 同步等待ML Kit检测结果（后台也能可靠工作）
-                val faces = com.google.android.gms.tasks.Tasks.await(task, 5000L, java.util.concurrent.TimeUnit.MILLISECONDS)
+        faceDetector?.process(inputImage)?.addOnSuccessListener { faces ->
+            if (!isMonitoring) return@addOnSuccessListener
+            
+            if (faces.isNotEmpty()) {
+                lastFaceDetectedTime = System.currentTimeMillis()
                 
-                if (isMonitoring) {
-                    if (faces.isNotEmpty()) {
-                        lastFaceDetectedTime = System.currentTimeMillis()
-                        
-                        val face = faces[0]
-                        val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)
-                        val rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE)
+                val face = faces[0]
+                val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)
+                val rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE)
 
-                        if (leftEye != null && rightEye != null) {
-                            val leftPos = leftEye.position
-                            val rightPos = rightEye.position
-                            val dx = rightPos.x - leftPos.x
-                            val dy = rightPos.y - leftPos.y
-                            val currentEyeDistancePx = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+                if (leftEye != null && rightEye != null) {
+                    val leftPos = leftEye.position
+                    val rightPos = rightEye.position
+                    val dx = rightPos.x - leftPos.x
+                    val dy = rightPos.y - leftPos.y
+                    val currentEyeDistancePx = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
 
-                            val estimatedDistanceCm = (NORMAL_READING_DISTANCE_CM.toFloat() *
-                                baselineEyeDistancePx / currentEyeDistancePx).toInt()
+                    val estimatedDistanceCm = (NORMAL_READING_DISTANCE_CM.toFloat() *
+                        baselineEyeDistancePx / currentEyeDistancePx).toInt()
 
-                            val isNear = estimatedDistanceCm < THRESHOLD_DISTANCE_CM
-                            
-                            // 同步拿到结果后立即处理警示开关
-                            if (isAlertActive && !isNear) {
-                                stopRedBlinkAlert()
-                            } else if (!isAlertActive && isNear) {
-                                startRedBlinkAlert()
-                            }
-                            
-                            if (isAlertActive) {
-                                distanceDataStore.saveDistance(estimatedDistanceCm)
-                                lastReportedDistance = estimatedDistanceCm
-                            }
-                        }
-                    } else {
-                        // 人脸丢失
-                        lastFaceDetectedTime = 0L
-                        if (isAlertActive) {
-                            stopRedBlinkAlert()
-                        }
+                    val isNear = estimatedDistanceCm < THRESHOLD_DISTANCE_CM
+                    
+                    // 关键修复：只要检测到距离>35cm就立即关警示，不要任何计数器
+                    // 这样即使后台帧率低，只要有一帧传回来就能关窗
+                    if (isAlertActive && !isNear) {
+                        stopRedBlinkAlert()
+                    } else if (!isAlertActive && isNear) {
+                        startRedBlinkAlert()
                     }
+                    
+                    distanceDataStore.saveDistance(estimatedDistanceCm)
+                    lastReportedDistance = estimatedDistanceCm
                 }
-            } catch (e: Exception) {
-                // ML Kit超时或失败，忽略这一帧
-                android.util.Log.w("DistanceMonitorService", "Face detection timeout: ${e.message}")
+            } else {
+                // 人脸丢失时立即关警示
+                lastFaceDetectedTime = 0L
+                if (isAlertActive) {
+                    stopRedBlinkAlert()
+                }
             }
+        }?.addOnFailureListener { e ->
+            e.printStackTrace()
+        }?.addOnCompleteListener {
+            imageProxy.close()
         }
-        imageProxy.close()
     }
 
     private fun startRedBlinkAlert() {

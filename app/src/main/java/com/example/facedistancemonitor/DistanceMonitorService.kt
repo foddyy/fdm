@@ -92,11 +92,10 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     override fun onDisplayRemoved(displayId: Int) {}
     
     override fun onDisplayChanged(displayId: Int) {
-        // 屏幕方向变化时重启相机（即使Activity在后台）
-        android.util.Log.d("DistanceMonitorService", "Display changed, orientation: $currentDisplayOrientation")
-        if (isMonitoring) {
-            restartCamera()
-        }
+        // 屏幕方向变化时不再重启相机
+        // 原因：后台时restartCamera()会unbind相机，导致系统暂停相机流
+        // 让相机持续运行即可，ML Kit会自动处理不同方向的图像
+        android.util.Log.d("DistanceMonitorService", "Display changed, orientation: $currentDisplayOrientation, keeping camera running")
     }
 
     private fun setupTTS() {

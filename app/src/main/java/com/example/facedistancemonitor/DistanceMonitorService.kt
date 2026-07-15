@@ -238,6 +238,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                 
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setTargetRotation(Surface.ROTATION_0)
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->

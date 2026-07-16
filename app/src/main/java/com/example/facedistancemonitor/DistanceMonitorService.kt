@@ -71,6 +71,9 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     // 用于监听系统屏幕旋转（解决后台横屏不弹窗问题）
     private lateinit var displayManager: DisplayManager
     private var currentDisplayOrientation = 0 // 0=portrait, 1=landscape
+    
+    // 相机绑定引用（不绑定生命周期，保持相机持续运行）
+    private var cameraBinding: androidx.camera.core.UseCaseGroup? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -237,8 +240,11 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
             try {
                 val cameraProvider = ProcessCameraProvider.getInstance(applicationContext).get()
                 
+                // 关键修复：不绑定任何Lifecycle，让相机独立运行
+                // 这样即使应用进入后台、Surface被销毁，相机仍然持续传帧
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setDefaultBufferSize(androidx.camera.core.ImageSize(640, 480))
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
@@ -247,7 +253,9 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
+                // 使用bind()而非bindToLifecycle()，不依赖任何生命周期
+                // 相机会一直运行，直到手动unbind
+                cameraBinding = cameraProvider.bind(selector, imageAnalysis)
                 
                 distanceDataStore.markCameraReady()
             } catch (e: Exception) {
@@ -266,6 +274,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                 
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setDefaultBufferSize(androidx.camera.core.ImageSize(640, 480))
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
@@ -273,7 +282,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                 }
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
-                cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
+                cameraBinding = cameraProvider.bind(selector, imageAnalysis)
                 
                 distanceDataStore.markCameraReady()
                 android.util.Log.d("DistanceMonitorService", "Camera restarted after orientation change")

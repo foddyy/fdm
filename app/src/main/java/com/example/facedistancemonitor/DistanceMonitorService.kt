@@ -73,7 +73,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     private var currentDisplayOrientation = 0 // 0=portrait, 1=landscape
     
     // 相机绑定引用（不绑定生命周期，保持相机持续运行）
-    private var cameraBinding: androidx.camera.core.UseCaseGroup? = null
+    private var cameraBinding: androidx.camera.core.Camera? = null
 
     override fun onCreate() {
         super.onCreate()

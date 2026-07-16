@@ -71,7 +71,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     private lateinit var displayManager: DisplayManager
     private var currentDisplayOrientation = 0
     
-    private var cameraBinding: androidx.camera.core.UseCaseGroup? = null
+    private var cameraBinding: androidx.camera.core.ProcessCameraProvider.BoundUseCases? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -237,8 +237,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
                 cameraProvider.unbindAll()
-                cameraBinding = cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
-                
+                cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
                 distanceDataStore.markCameraReady()
             } catch (e: Exception) {
                 val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
@@ -263,10 +262,8 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                 }
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
-                cameraBinding = cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
-                
-                distanceDataStore.markCameraReady()
-                android.util.Log.d("DistanceMonitorService", "Camera restarted after orientation change")
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
             } catch (e: Exception) {
                 val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
                 distanceDataStore.markCameraError(errorMsg)

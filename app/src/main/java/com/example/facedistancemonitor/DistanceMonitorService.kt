@@ -56,9 +56,9 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     private var lastReportedDistance: Int = -1
     
     private var lastFrameTimeMs = 0L
-    private var lastAlertStartTime = 0L  // 记录警示开始时间
-    private var alertTimeoutHandler: Handler? = null  // 警示超时定时器
-    private var alertTimeoutRunnable: Runnable? = null  // 警示超时回调
+    private var lastAlertStartTime = 0L
+    private var alertTimeoutHandler: Handler? = null
+    private var alertTimeoutRunnable: Runnable? = null
     
     private var tts: TextToSpeech? = null
     private var ttsInitialized = false
@@ -68,12 +68,10 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     private var lastFaceDetectedTime = 0L
     private val REST_REMINDER_INTERVAL_MS = 20 * 60 * 1000L
     
-    // 用于监听系统屏幕旋转（解决后台横屏不弹窗问题）
     private lateinit var displayManager: DisplayManager
-    private var currentDisplayOrientation = 0 // 0=portrait, 1=landscape
+    private var currentDisplayOrientation = 0
     
-    // 相机绑定引用（不绑定生命周期，保持相机持续运行）
-    private var cameraBinding: androidx.camera.core.Camera? = null
+    private var cameraBinding: androidx.camera.core.UseCaseGroup? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -83,11 +81,9 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         cameraExecutor = Executors.newSingleThreadExecutor()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         
-        // 初始化DisplayManager监听屏幕旋转
         displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
         displayManager.registerDisplayListener(this, null)
         
-        // 修复问题3：Service重建时重置相机状态，防止UI假死
         distanceDataStore.markCameraStatus("none")
         
         startForegroundService()
@@ -99,9 +95,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     
     override fun onDisplayChanged(displayId: Int) {
         // 屏幕方向变化时不再重启相机
-        // 原因：后台时restartCamera()会unbind相机，导致系统暂停相机流
-        // 让相机持续运行即可，ML Kit会自动处理不同方向的图像
-        android.util.Log.d("DistanceMonitorService", "Display changed, orientation: $currentDisplayOrientation, keeping camera running")
+        android.util.Log.d("DistanceMonitorService", "Display changed, keeping camera running")
     }
 
     private fun setupTTS() {
@@ -225,13 +219,6 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
             }
         }
         
-        // 修复问题3：START_STICKY重建时，如果isMonitoring为false但SharedPreferences说在监控
-        // 说明Service被杀后重启，需要重置状态避免UI假死
-        if (intent == null && isMonitoring) {
-            // START_STICKY重建，但isMonitoring应该是false（因为对象重建了）
-            // 这里不需要特殊处理，因为MainActivity会调用syncServiceStateToUI()
-        }
-        
         return START_STICKY
     }
 
@@ -240,11 +227,8 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
             try {
                 val cameraProvider = ProcessCameraProvider.getInstance(applicationContext).get()
                 
-                // 关键修复：不绑定任何Lifecycle，让相机独立运行
-                // 这样即使应用进入后台、Surface被销毁，相机仍然持续传帧
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .setDefaultBufferSize(androidx.camera.core.ImageSize(640, 480))
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
@@ -253,9 +237,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
                 cameraProvider.unbindAll()
-                // 使用bind()而非bindToLifecycle()，不依赖任何生命周期
-                // 相机会一直运行，直到手动unbind
-                cameraBinding = cameraProvider.bind(selector, imageAnalysis)
+                cameraBinding = cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
                 
                 distanceDataStore.markCameraReady()
             } catch (e: Exception) {
@@ -274,7 +256,6 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                 
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .setDefaultBufferSize(androidx.camera.core.ImageSize(640, 480))
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy: ImageProxy ->
@@ -282,7 +263,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                 }
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
-                cameraBinding = cameraProvider.bind(selector, imageAnalysis)
+                cameraBinding = cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
                 
                 distanceDataStore.markCameraReady()
                 android.util.Log.d("DistanceMonitorService", "Camera restarted after orientation change")
@@ -340,22 +321,18 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
 
                     val isNear = estimatedDistanceCm < THRESHOLD_DISTANCE_CM
                     
-                    // 关键修复：只要检测到距离>35cm就立即关警示，不要任何计数器
-                    // 这样即使后台帧率低，只要有一帧传回来就能关窗
                     if (isAlertActive && !isNear) {
                         stopRedBlinkAlert()
                     } else if (!isAlertActive && isNear) {
                         startRedBlinkAlert()
                     }
                     
-                    // 重置超时定时器：收到新的近距离信号说明ML Kit还在工作
                     alertTimeoutHandler?.removeCallbacks(alertTimeoutRunnable!!)
                     
                     distanceDataStore.saveDistance(estimatedDistanceCm)
                     lastReportedDistance = estimatedDistanceCm
                 }
             } else {
-                // 人脸丢失时立即关警示
                 lastFaceDetectedTime = 0L
                 if (isAlertActive) {
                     stopRedBlinkAlert()
@@ -370,9 +347,8 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
 
     private fun startRedBlinkAlert() {
         isAlertActive = true
-        lastAlertStartTime = System.currentTimeMillis()  // 记录警示开始时间
+        lastAlertStartTime = System.currentTimeMillis()
         
-        // 启动2秒超时定时器：如果2秒内没有收到新的近距离信号，自动关闭警示
         if (alertTimeoutHandler == null) {
             alertTimeoutHandler = Handler(Looper.getMainLooper())
         }
@@ -417,7 +393,6 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         isAlertActive = false
         lastAlertStartTime = 0L
         
-        // 取消超时定时器
         alertTimeoutHandler?.removeCallbacks(alertTimeoutRunnable!!)
 
         alertView?.let { view ->
@@ -447,13 +422,11 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         tts?.shutdown()
         cameraExecutor.shutdown()
         faceDetector?.close()
-        // 注销DisplayListener
         try {
             displayManager.unregisterDisplayListener(this)
         } catch (e: Exception) {
             android.util.Log.w("DistanceMonitorService", "Failed to unregister display listener", e)
         }
-        // 修复问题3：Service被杀时清理监控标志，防止重启后UI假死
         getSharedPreferences("app_prefs", MODE_PRIVATE).edit().remove("service_monitoring").apply()
         distanceDataStore.markCameraStatus("none")
         android.util.Log.d("DistanceMonitorService", "Service destroyed, cleared monitoring state")

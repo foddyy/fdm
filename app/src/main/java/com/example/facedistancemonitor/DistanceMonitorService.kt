@@ -70,8 +70,6 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     
     private lateinit var displayManager: DisplayManager
     private var currentDisplayOrientation = 0
-    
-    private var cameraBinding: androidx.camera.core.ProcessCameraProvider.BoundUseCases? = null
 
     override fun onCreate() {
         super.onCreate()

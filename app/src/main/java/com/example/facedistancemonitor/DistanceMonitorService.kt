@@ -217,6 +217,20 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
             }
         }
         
+        // 修复：START_STICKY 重建时，如果 SharedPreferences 说在监控且已校准过距离，自动恢复
+        if (intent == null) {
+            val wasMonitoring = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .getBoolean("service_monitoring", false)
+            baselineEyeDistancePx = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .getFloat("baseline_eye_distance_px", 0f)
+            if (wasMonitoring && baselineEyeDistancePx > 0) {
+                android.util.Log.d("DistanceMonitorService", "Service restarted after kill, restoring monitoring")
+                isMonitoring = true
+                startCameraMonitoring()
+                startRestReminder()
+            }
+        }
+        
         return START_STICKY
     }
 

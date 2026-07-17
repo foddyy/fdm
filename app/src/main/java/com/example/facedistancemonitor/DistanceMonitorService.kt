@@ -41,6 +41,7 @@ class PersistentLifecycleOwner : LifecycleOwner {
     private val lifecycleRegistry = LifecycleRegistry(this)
     
     init {
+        // 直接设为STARTED状态，满足bindToLifecycle的要求
         lifecycleRegistry.currentState = Lifecycle.State.STARTED
     }
     

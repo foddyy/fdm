@@ -6,19 +6,20 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.media.AudioAttributes
 import android.os.Build
 import android.os.IBinder
 import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
-import android.view.Surface
 import android.view.WindowManager
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.LifecycleService
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
@@ -31,6 +32,22 @@ import java.util.concurrent.ExecutorService
 import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayManager.DisplayListener
 import android.util.Log
+
+/**
+ * 一个始终处于STARTED状态的生命周期持有者。
+ * 用于绑定CameraX，使其不受Service生命周期影响（Service进后台后不会暂停相机）。
+ */
+class PersistentLifecycleOwner : LifecycleOwner {
+    private val lifecycleRegistry = LifecycleRegistry(this)
+    
+    init {
+        lifecycleRegistry.currentState = Lifecycle.State.STARTED
+    }
+    
+    override fun getLifecycle(): Lifecycle {
+        return lifecycleRegistry
+    }
+}
 
 class DistanceMonitorService : LifecycleService(), DisplayListener {
 
@@ -70,6 +87,9 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     
     private lateinit var displayManager: DisplayManager
     private var currentDisplayOrientation = 0
+    
+    // 独立的生命周期持有者，始终处于STARTED状态，不受Service生命周期影响
+    private val persistentLifecycleOwner = PersistentLifecycleOwner()
 
     override fun onCreate() {
         super.onCreate()
@@ -249,7 +269,9 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
+                // 关键修复：绑定到persistentLifecycleOwner而非Service本身
+                // 这样即使Service进入STOPPED状态（App进后台），相机仍持续传帧
+                cameraProvider.bindToLifecycle(persistentLifecycleOwner, selector, imageAnalysis)
                 distanceDataStore.markCameraReady()
             } catch (e: Exception) {
                 val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
@@ -275,7 +297,11 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, selector, imageAnalysis)
+                // 关键修复：绑定到persistentLifecycleOwner而非Service本身
+                cameraProvider.bindToLifecycle(persistentLifecycleOwner, selector, imageAnalysis)
+                
+                distanceDataStore.markCameraReady()
+                android.util.Log.d("DistanceMonitorService", "Camera restarted after orientation change")
             } catch (e: Exception) {
                 val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
                 distanceDataStore.markCameraError(errorMsg)

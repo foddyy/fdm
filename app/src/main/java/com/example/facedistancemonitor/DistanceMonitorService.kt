@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
@@ -92,6 +93,9 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     
     // 独立的生命周期持有者，始终处于STARTED状态，不受Service生命周期影响
     private val persistentLifecycleOwner = PersistentLifecycleOwner()
+    
+    // 唤醒锁：保持CPU在后台运行时不休眠
+    private var wakeLock: PowerManager.WakeLock? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -186,6 +190,31 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }
+        
+        // 获取WakeLock，防止后台CPU休眠导致相机断流
+        acquireWakeLock()
+    }
+    
+    private fun acquireWakeLock() {
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = pm.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "FaceDistanceMonitor:CameraWakeLock"
+        ).apply {
+            setReferenceCounted(false)
+            acquire()
+        }
+        android.util.Log.d("DistanceMonitorService", "WakeLock acquired")
+    }
+    
+    private fun releaseWakeLock() {
+        wakeLock?.let {
+            if (it.isHeld) {
+                it.release()
+                android.util.Log.d("DistanceMonitorService", "WakeLock released")
+            }
+        }
+        wakeLock = null
     }
 
     private fun createNotificationChannel() {
@@ -459,6 +488,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         tts?.shutdown()
         cameraExecutor.shutdown()
         faceDetector?.close()
+        releaseWakeLock()
         try {
             displayManager.unregisterDisplayListener(this)
         } catch (e: Exception) {

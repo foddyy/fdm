@@ -40,15 +40,14 @@ import android.util.Log
 class PersistentLifecycleOwner : LifecycleOwner {
     private val lifecycleRegistry = LifecycleRegistry(this)
     
+    override val lifecycle: Lifecycle
+        get() = lifecycleRegistry
+    
     init {
         // 必须到RESUMED状态，CameraX才会真正启动相机
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    }
-    
-    override fun getLifecycle(): Lifecycle {
-        return lifecycleRegistry
     }
 }
 

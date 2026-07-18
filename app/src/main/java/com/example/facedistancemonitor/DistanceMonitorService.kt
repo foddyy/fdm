@@ -343,6 +343,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
 
     private fun analyzeFrame(imageProxy: ImageProxy) {
         if (!isMonitoring || baselineEyeDistancePx <= 0) {
+            android.util.Log.d("DistanceMonitorService", "analyzeFrame: skip, isMonitoring=$isMonitoring, baseline=$baselineEyeDistancePx")
             imageProxy.close()
             return
         }
@@ -355,6 +356,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         lastFrameTimeMs = now
         
         distanceDataStore.markFrameProcessed()
+        android.util.Log.d("DistanceMonitorService", "analyzeFrame: processing frame, rotation=${imageProxy.imageInfo.rotationDegrees}")
 
         val mediaImage = imageProxy.image
         if (mediaImage == null) {

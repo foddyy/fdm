@@ -303,6 +303,7 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                 // 这样即使Service进入STOPPED状态（App进后台），相机仍持续传帧
                 cameraProvider.bindToLifecycle(persistentLifecycleOwner, selector, imageAnalysis)
                 distanceDataStore.markCameraReady()
+                android.util.Log.d("DistanceMonitorService", "Camera started successfully")
             } catch (e: Exception) {
                 val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
                 distanceDataStore.markCameraError(errorMsg)
@@ -314,8 +315,10 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     private fun restartCamera() {
         Handler(Looper.getMainLooper()).post {
             try {
+                android.util.Log.d("DistanceMonitorService", "restartCamera() called, isMonitoring=$isMonitoring")
                 val cameraProvider = ProcessCameraProvider.getInstance(applicationContext).get()
                 cameraProvider.unbindAll()
+                android.util.Log.d("DistanceMonitorService", "Camera unbindAll done, rebinding...")
                 
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -326,18 +329,17 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                 }
 
                 val selector = CameraSelector.DEFAULT_FRONT_CAMERA
-                cameraProvider.unbindAll()
-                // 关键修复：绑定到persistentLifecycleOwner而非Service本身
                 cameraProvider.bindToLifecycle(persistentLifecycleOwner, selector, imageAnalysis)
+                android.util.Log.d("DistanceMonitorService", "Camera rebound successfully")
                 
                 distanceDataStore.markCameraReady()
-                android.util.Log.d("DistanceMonitorService", "Camera restarted after orientation change")
             } catch (e: Exception) {
                 val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
                 distanceDataStore.markCameraError(errorMsg)
                 android.util.Log.e("DistanceMonitorService", "Camera restart failed: $errorMsg", e)
             }
         }
+    }
     }
 
     private fun analyzeFrame(imageProxy: ImageProxy) {

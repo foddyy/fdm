@@ -340,7 +340,6 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
             }
         }
     }
-    }
 
     private fun analyzeFrame(imageProxy: ImageProxy) {
         if (!isMonitoring || baselineEyeDistancePx <= 0) {

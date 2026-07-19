@@ -92,9 +92,6 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     
     // 独立的生命周期持有者，始终处于STARTED状态，不受Service生命周期影响
     private val persistentLifecycleOwner = PersistentLifecycleOwner()
-    
-    // 唤醒锁：保持CPU在后台运行时不休眠
-    private var wakeLock: PowerManager.WakeLock? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -117,8 +114,11 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     override fun onDisplayRemoved(displayId: Int) {}
     
     override fun onDisplayChanged(displayId: Int) {
-        // 屏幕方向变化时不再重启相机
-        android.util.Log.d("DistanceMonitorService", "Display changed, keeping camera running")
+        // 屏幕方向变化时重启相机，确保横竖屏切换后CameraX正确绑定
+        android.util.Log.d("DistanceMonitorService", "Display changed, restarting camera")
+        if (isMonitoring) {
+            Handler(Looper.getMainLooper()).postDelayed({ restartCamera() }, 500)
+        }
     }
 
     private fun setupTTS() {
@@ -189,31 +189,6 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }
-        
-        // 获取WakeLock，防止后台CPU休眠导致相机断流
-        acquireWakeLock()
-    }
-    
-    private fun acquireWakeLock() {
-        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-        wakeLock = pm.newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK,
-            "FaceDistanceMonitor:CameraWakeLock"
-        ).apply {
-            setReferenceCounted(false)
-            acquire()
-        }
-        android.util.Log.d("DistanceMonitorService", "WakeLock acquired")
-    }
-    
-    private fun releaseWakeLock() {
-        wakeLock?.let {
-            if (it.isHeld) {
-                it.release()
-                android.util.Log.d("DistanceMonitorService", "WakeLock released")
-            }
-        }
-        wakeLock = null
     }
 
     private fun createNotificationChannel() {
@@ -337,6 +312,11 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                 val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "no message"}"
                 distanceDataStore.markCameraError(errorMsg)
                 android.util.Log.e("DistanceMonitorService", "Camera restart failed: $errorMsg", e)
+                // 如果是CAMERA_BUSY等错误，说明摄像头被其他应用占用了
+                if (e.message?.contains("CAMERA_BUSY", ignoreCase = true) == true ||
+                    e.message?.contains("already in use", ignoreCase = true) == true) {
+                    android.util.Log.w("DistanceMonitorService", "CAMERA可能被其他横屏应用占用，请检查是否打开了视频/游戏等使用摄像头的App")
+                }
             }
         }
     }
@@ -384,10 +364,15 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
                     val dy = rightPos.y - leftPos.y
                     val currentEyeDistancePx = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
 
+                    // 日志：打印 landmark 原始坐标和眼睛距离像素值
+                    android.util.Log.d("DistanceMonitorService", "Face detected: rotation=$rotationDegrees, leftEye=($leftPos), rightEye=($rightPos), eyeDistancePx=$currentEyeDistancePx, baseline=$baselineEyeDistancePx")
+
                     val estimatedDistanceCm = (NORMAL_READING_DISTANCE_CM.toFloat() *
                         baselineEyeDistancePx / currentEyeDistancePx).toInt()
 
                     val isNear = estimatedDistanceCm < THRESHOLD_DISTANCE_CM
+                    
+                    android.util.Log.d("DistanceMonitorService", "Estimated distance: $estimatedDistanceCm cm, isNear=$isNear")
                     
                     if (isAlertActive && !isNear) {
                         stopRedBlinkAlert()
@@ -490,7 +475,6 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
         tts?.shutdown()
         cameraExecutor.shutdown()
         faceDetector?.close()
-        releaseWakeLock()
         try {
             displayManager.unregisterDisplayListener(this)
         } catch (e: Exception) {

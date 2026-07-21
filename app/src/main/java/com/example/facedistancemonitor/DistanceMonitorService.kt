@@ -399,59 +399,73 @@ class DistanceMonitorService : LifecycleService(), DisplayListener {
     }
 
     private fun startRedBlinkAlert() {
-        isAlertActive = true
-        lastAlertStartTime = System.currentTimeMillis()
-        
-        if (alertTimeoutHandler == null) {
-            alertTimeoutHandler = Handler(Looper.getMainLooper())
-        }
-        alertTimeoutRunnable = Runnable {
-            if (isAlertActive) {
-                android.util.Log.d("DistanceMonitorService", "Alert timeout: closing after 2s without near signal")
-                stopRedBlinkAlert()
+        Handler(Looper.getMainLooper()).post {
+            isAlertActive = true
+            lastAlertStartTime = System.currentTimeMillis()
+            
+            if (alertTimeoutHandler == null) {
+                alertTimeoutHandler = Handler(Looper.getMainLooper())
+            }
+            alertTimeoutRunnable = Runnable {
+                if (isAlertActive) {
+                    android.util.Log.d("DistanceMonitorService", "Alert timeout: closing after 2s without near signal")
+                    stopRedBlinkAlert()
+                }
+            }
+            alertTimeoutHandler!!.postDelayed(alertTimeoutRunnable!!, 2000L)
+
+            alertView = ViewAlertOverlay(this)
+            
+            val currentLang = resources.configuration.locale.language
+            val titleResId = if (currentLang == "en") {
+                R.string.alert_overlay_title_en
+            } else {
+                R.string.alert_overlay_title_zh
+            }
+            val overlay = alertView!!
+            overlay.setAlertTitle(titleResId)
+            
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                } else {
+                    @Suppress("DEPRECATION")
+                    WindowManager.LayoutParams.TYPE_PHONE
+                },
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                        WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                android.graphics.PixelFormat.TRANSLUCENT
+            )
+
+            try {
+                windowManager?.addView(alertView, params)
+                android.util.Log.d("DistanceMonitorService", "Alert overlay added successfully")
+            } catch (e: Exception) {
+                android.util.Log.e("DistanceMonitorService", "Failed to add alert overlay: ${e.message}", e)
             }
         }
-        alertTimeoutHandler!!.postDelayed(alertTimeoutRunnable!!, 2000L)
-
-        alertView = ViewAlertOverlay(this)
-        
-        val currentLang = resources.configuration.locale.language
-        val titleResId = if (currentLang == "en") {
-            R.string.alert_overlay_title_en
-        } else {
-            R.string.alert_overlay_title_zh
-        }
-        val overlay = alertView!!
-        overlay.setAlertTitle(titleResId)
-        
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            } else {
-                @Suppress("DEPRECATION")
-                WindowManager.LayoutParams.TYPE_PHONE
-            },
-            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-            android.graphics.PixelFormat.TRANSLUCENT
-        )
-
-        windowManager?.addView(alertView, params)
     }
 
     private fun stopRedBlinkAlert() {
-        isAlertActive = false
-        lastAlertStartTime = 0L
-        
-        alertTimeoutHandler?.removeCallbacks(alertTimeoutRunnable!!)
+        Handler(Looper.getMainLooper()).post {
+            isAlertActive = false
+            lastAlertStartTime = 0L
+            
+            alertTimeoutHandler?.removeCallbacks(alertTimeoutRunnable!!)
 
-        alertView?.let { view ->
-            windowManager?.removeView(view)
+            alertView?.let { view ->
+                try {
+                    windowManager?.removeView(view)
+                    android.util.Log.d("DistanceMonitorService", "Alert overlay removed")
+                } catch (e: Exception) {
+                    android.util.Log.e("DistanceMonitorService", "Failed to remove alert overlay: ${e.message}", e)
+                }
+            }
+            alertView = null
         }
-        alertView = null
     }
 
     private fun stopMonitoring() {

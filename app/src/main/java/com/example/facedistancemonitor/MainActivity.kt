@@ -319,7 +319,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         serviceRunning = true
-        updateStatusUI(true)
+        updateStatusUI(binding, true)
     }
 
     private fun stopMonitoring() {
@@ -329,7 +329,7 @@ class MainActivity : AppCompatActivity() {
         startService(intent)
 
         serviceRunning = false
-        updateStatusUI(false)
+        updateStatusUI(binding, false)
         
         distanceUpdateRunnable?.let { 
             distanceUpdateHandler.removeCallbacks(it)

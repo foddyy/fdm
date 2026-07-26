@@ -216,7 +216,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateLangButtonText() {
         binding.cardHeaderLayout?.let {
-            it.btnLanguage.setImageResource(if (localeIsChinese()) R.drawable.ic_lang_en else R.drawable.ic_lang_zh)
+            it.btnLanguage.text = if (localeIsChinese()) "EN" else "中文"
         }
     }
 

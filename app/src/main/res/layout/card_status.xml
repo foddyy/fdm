@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Card 2: Status display - frosted glass effect -->
+<!-- Card 2: Status display - centered -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="20dp"
-        android:gravity="center_vertical">
+        android:gravity="center">
 
         <!-- Status LED -->
         <View
@@ -24,9 +24,8 @@
         <!-- Status Text -->
         <TextView
             android:id="@+id/tv_status"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginStart="14dp"
             android:text="@string/status_running"
             android:textSize="17sp"

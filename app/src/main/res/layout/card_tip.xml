@@ -25,14 +25,14 @@
             android:textColor="#2D3748"
             android:textStyle="bold" />
 
-        <!-- QR Code Placeholder -->
+        <!-- QR Code -->
         <ImageView
             android:id="@+id/iv_qr_code"
             android:layout_width="180dp"
             android:layout_height="180dp"
             android:layout_marginTop="16dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_qr_placeholder"
+            android:src="@drawable/ic_tip_qr"
             android:contentDescription="@string/tip_qr_code" />
 
     </LinearLayout>

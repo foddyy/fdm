@@ -255,11 +255,31 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun refreshAllText() {
+        // Update header
+        binding.cardHeaderLayout?.let {
+            it.tvAppTitle.text = getString(R.string.app_name)
+        }
+        updateLangButtonText()
+        
+        // Update status card
         updateStatusUI(binding, serviceRunning)
+        
+        // Update distance card
+        binding.cardDistanceLayout?.let {
+            it.tvThresholdLabel.text = getString(R.string.label_threshold)
+            it.tvThresholdValue.text = getString(R.string.threshold_default)
+        }
+        
+        // Update buttons
+        binding.cardButtonsLayout?.let {
+            it.btnStartPause.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start)
+            it.btnCalibrate.text = getString(R.string.btn_calibrate)
+        }
+        
+        // Update tip card
         binding.cardTipLayout?.let {
             it.tvTipTitle.text = getString(R.string.tip_qr_title)
         }
-        updateLangButtonText()
     }
 
     private fun hasAllPermissions(): Boolean {

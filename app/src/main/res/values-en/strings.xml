@@ -34,4 +34,9 @@
     <string name="btn_start">Start</string>
     <string name="btn_calibrate_short">Calibrate</string>
     <string name="label_threshold">Threshold</string>
+    <string name="perm_all_granted">All permissions granted</string>
+    <string name="perm_required">Permissions required to run this app</string>
+    <string name="perm_overlay_granted">Overlay permission granted</string>
+    <string name="perm_overlay_required">Overlay permission needed for alerts</string>
+    <string name="status_no_signal">No signal</string>
 </resources>

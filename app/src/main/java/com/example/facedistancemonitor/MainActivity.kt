@@ -34,9 +34,9 @@ class MainActivity : AppCompatActivity() {
     ) { permissions ->
         val allGranted = permissions.values.all { it }
         if (allGranted) {
-            Toast.makeText(this, "所有权限已授予", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.perm_all_granted), Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "需要权限才能运行此应用", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.perm_required), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -45,9 +45,9 @@ class MainActivity : AppCompatActivity() {
     ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (Settings.canDrawOverlays(this)) {
-                Toast.makeText(this, "悬浮窗权限已授予", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.perm_overlay_granted), Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "需要悬浮窗权限以显示警示", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.perm_overlay_required), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -357,7 +357,7 @@ class MainActivity : AppCompatActivity() {
                             cameraStatus == "none" -> layout.tvDistance.text = "--"
                             cameraStatus.startsWith("error:") -> layout.tvDistance.text = "Err"
                             frameAgeSec < 0 -> layout.tvDistance.text = "--"
-                            frameAgeSec > 5 -> layout.tvDistance.text = "无信号"
+                            frameAgeSec > 5 -> layout.tvDistance.text = getString(R.string.status_no_signal)
                             else -> layout.tvDistance.text = "--"
                         }
                     }

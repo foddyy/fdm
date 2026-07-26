@@ -34,4 +34,9 @@
     <string name="btn_start">开始监测</string>
     <string name="btn_calibrate_short">校准距离</string>
     <string name="label_threshold">安全阈值</string>
+    <string name="perm_all_granted">所有权限已授予</string>
+    <string name="perm_required">需要权限才能运行此应用</string>
+    <string name="perm_overlay_granted">悬浮窗权限已授予</string>
+    <string name="perm_overlay_required">需要悬浮窗权限以显示警示</string>
+    <string name="status_no_signal">无信号</string>
 </resources>

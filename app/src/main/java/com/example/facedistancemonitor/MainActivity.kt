@@ -272,7 +272,7 @@ class MainActivity : AppCompatActivity() {
         
         // Update buttons
         binding.cardButtonsLayout?.let {
-            it.btnStartPause.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)tor) else getString(R.string.btn_start)
+            it.btnStartPause.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
             it.btnCalibrate.text = getString(R.string.btn_calibrate)
         }
         

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Card 3: Distance display -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="12dp"
+    android:background="@drawable/card_elevation">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
+
+        <!-- Threshold Label -->
+        <TextView
+            android:id="@+id/tv_threshold_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_threshold"
+            android:textSize="14sp"
+            android:textColor="#718096" />
+
+        <!-- Threshold Value -->
+        <TextView
+            android:id="@+id/tv_threshold_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="12dp"
+            android:text="@string/threshold_default"
+            android:textSize="15sp"
+            android:textColor="#ED8936"
+            android:textStyle="bold" />
+
+        <!-- Distance Number -->
+        <TextView
+            android:id="@+id/tv_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-- cm"
+            android:textSize="64sp"
+            android:textStyle="bold"
+            android:textColor="#319795" />
+
+        <!-- Distance Unit -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-8dp"
+            android:text="@string/unit_cm"
+            android:textSize="18sp"
+            android:textColor="#A0AEC0" />
+
+    </LinearLayout>
+
+</FrameLayout>

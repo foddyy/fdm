@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Card 5: Tip QR code -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="12dp"
+    android:layout_marginBottom="32dp"
+    android:background="@drawable/card_elevation">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tv_tip_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tip_qr_title"
+            android:textSize="16sp"
+            android:textColor="#2D3748"
+            android:textStyle="bold" />
+
+        <!-- QR Code Placeholder -->
+        <ImageView
+            android:id="@+id/iv_qr_code"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:layout_marginTop="16dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_qr_placeholder"
+            android:contentDescription="@string/tip_qr_code" />
+
+    </LinearLayout>
+
+</FrameLayout>

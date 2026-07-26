@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -116,10 +117,10 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         
-        // 修复问题3：同步Service真实运行状态到UI
+        // 同步Service真实运行状态到UI
         syncServiceStateToUI()
         
-        // 修复问题2：回到前台时如果Service在监控但相机未工作，重启相机
+        // 回到前台时如果Service在监控但相机未工作，重启相机
         if (serviceRunning) {
             val cameraStatus = distanceDataStore.getCameraStatus()
             if (cameraStatus != "ready") {
@@ -145,10 +146,6 @@ class MainActivity : AppCompatActivity() {
     
     /** 同步Service真实运行状态到UI */
     private fun syncServiceStateToUI() {
-        // 修复问题2：通过检查相机帧是否还在更新来判断Service是否真实存活
-        // 不能只用SharedPreferences，因为Service被杀后SharedPreferences残留旧值
-        // 如果相机状态为ready且超过10秒没有新帧，说明Service已经不工作了
-        
         val lastFrame = distanceDataStore.getLastFrameTime()
         val cameraStatus = distanceDataStore.getCameraStatus()
         val now = System.currentTimeMillis()
@@ -159,23 +156,7 @@ class MainActivity : AppCompatActivity() {
         
         if (serviceActuallyWorking != serviceRunning) {
             serviceRunning = serviceActuallyWorking
-            if (serviceRunning) {
-                binding.tvStatusText.text = getString(R.string.status_running)
-                binding.viewStatusCircle.background = ContextCompat.getDrawable(this, R.drawable.status_led_running)
-                binding.btnStartMonitor.text = getString(R.string.btn_stop_monitor)
-                binding.btnStartMonitor.setOnClickListener { stopMonitoring() }
-            } else {
-                // Service已死，清理状态
-                getSharedPreferences("app_prefs", MODE_PRIVATE).edit()
-                    .remove("service_monitoring")
-                    .apply()
-                distanceDataStore.markCameraStatus("none")
-                
-                binding.tvStatusText.text = getString(R.string.status_idle)
-                binding.viewStatusCircle.background = ContextCompat.getDrawable(this, R.drawable.status_led_idle)
-                binding.btnStartMonitor.text = getString(R.string.btn_start_monitor)
-                binding.btnStartMonitor.setOnClickListener { startMonitoring() }
-            }
+            updateStatusUI(serviceRunning)
         }
     }
 
@@ -190,23 +171,51 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.btnStartMonitor.setOnClickListener {
-            startMonitoring()
-        }
+        // Header card - app icon and title
+        binding.cardHeaderLayout.ivAppIcon.setImageResource(R.drawable.ic_logo)
+        binding.cardHeaderLayout.tvAppTitle.text = getString(R.string.app_name)
 
-        binding.btnRecalibrate.setOnClickListener {
-            startActivity(Intent(this, CalibrationActivity::class.java))
-        }
-
-        updateLangButtonText()
-        
-        binding.btnLangSwitch.setOnClickListener {
+        // Header card - language toggle
+        binding.cardHeaderLayout.btnLanguage.setOnClickListener {
             toggleLanguage()
         }
+
+        // Buttons card
+        binding.cardButtonsLayout.btnStartPause.setOnClickListener {
+            if (serviceRunning) {
+                stopMonitoring()
+            } else {
+                startMonitoring()
+            }
+        }
+
+        binding.cardButtonsLayout.btnCalibrate.setOnClickListener {
+            startActivity(Intent(this, CalibrationActivity::class.java))
+        }
+        
+        updateLangButtonText()
     }
     
+    private fun updateStatusUI(isRunning: Boolean) {
+        val statusText = if (isRunning) getString(R.string.status_running) else getString(R.string.status_idle)
+        binding.cardStatusLayout.tvStatus.text = statusText
+        
+        val ledDrawable = if (isRunning) {
+            ContextCompat.getDrawable(this, R.drawable.status_led_running)
+        } else {
+            ContextCompat.getDrawable(this, R.drawable.status_led_idle)
+        }
+        binding.cardStatusLayout.vStatusLed.background = ledDrawable
+        
+        if (isRunning) {
+            binding.cardButtonsLayout.btnStartPause.text = getString(R.string.btn_stop_monitor)
+        } else {
+            binding.cardButtonsLayout.btnStartPause.text = getString(R.string.btn_start_monitor)
+        }
+    }
+
     private fun updateLangButtonText() {
-        binding.btnLangSwitch.text = if (localeIsChinese()) "EN" else "中文"
+        binding.cardHeaderLayout.btnLanguage.setImageResource(if (localeIsChinese()) R.drawable.ic_lang_en else R.drawable.ic_lang_zh)
     }
 
     private fun toggleLanguage() {
@@ -244,9 +253,8 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun refreshAllText() {
-        binding.tvStatusText.text = if (serviceRunning) getString(R.string.status_running) else getString(R.string.status_idle)
-        binding.btnStartMonitor.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
-        binding.btnRecalibrate.text = getString(R.string.btn_recalibrate)
+        updateStatusUI(serviceRunning)
+        binding.cardTipLayout.tvTipTitle.text = getString(R.string.tip_qr_title)
         updateLangButtonText()
     }
 
@@ -306,15 +314,8 @@ class MainActivity : AppCompatActivity() {
             startService(intent)
         }
 
-        binding.tvStatusText.text = getString(R.string.status_running)
-        binding.viewStatusCircle.background = ContextCompat.getDrawable(
-            this, R.drawable.status_led_running
-        )
-        binding.btnStartMonitor.text = getString(R.string.btn_stop_monitor)
         serviceRunning = true
-        binding.btnStartMonitor.setOnClickListener {
-            stopMonitoring()
-        }
+        updateStatusUI(true)
     }
 
     private fun stopMonitoring() {
@@ -323,15 +324,8 @@ class MainActivity : AppCompatActivity() {
         }
         startService(intent)
 
-        binding.tvStatusText.text = getString(R.string.status_idle)
-        binding.viewStatusCircle.background = ContextCompat.getDrawable(
-            this, R.drawable.status_led_idle
-        )
-        binding.btnStartMonitor.text = getString(R.string.btn_start_monitor)
         serviceRunning = false
-        binding.btnStartMonitor.setOnClickListener {
-            startMonitoring()
-        }
+        updateStatusUI(false)
         
         distanceUpdateRunnable?.let { 
             distanceUpdateHandler.removeCallbacks(it)
@@ -350,15 +344,18 @@ class MainActivity : AppCompatActivity() {
                 val frameAgeSec = if (lastFrame > 0) ((now - lastFrame) / 1000).toInt() else -1
                 
                 if (distance >= 0) {
-                    binding.tvEstimatedDistance.text = getString(R.string.distance_info, distance)
+                    binding.cardDistanceLayout.tvDistance.text = "$distance"
+                    // Update threshold label
+                    val threshold = distanceDataStore.getThreshold()
+                    binding.cardDistanceLayout.tvThresholdValue.text = "≥ $threshold cm"
                 } else {
-                    binding.tvEstimatedDistance.text = "等待检测..."
+                    binding.cardDistanceLayout.tvDistance.text = "--"
                     when {
-                        cameraStatus == "none" -> binding.tvEstimatedDistance.text = "等待检测..."
-                        cameraStatus.startsWith("error:") -> binding.tvEstimatedDistance.text = "相机错误"
-                        frameAgeSec < 0 -> binding.tvEstimatedDistance.text = "相机就绪..."
-                        frameAgeSec > 5 -> binding.tvEstimatedDistance.text = "相机卡住"
-                        else -> binding.tvEstimatedDistance.text = "未检测到人脸"
+                        cameraStatus == "none" -> binding.cardDistanceLayout.tvDistance.text = "--"
+                        cameraStatus.startsWith("error:") -> binding.cardDistanceLayout.tvDistance.text = "Err"
+                        frameAgeSec < 0 -> binding.cardDistanceLayout.tvDistance.text = "--"
+                        frameAgeSec > 5 -> binding.cardDistanceLayout.tvDistance.text = "无信号"
+                        else -> binding.cardDistanceLayout.tvDistance.text = "--"
                     }
                 }
                 distanceUpdateHandler.postDelayed(this, DISTANCE_UPDATE_INTERVAL)

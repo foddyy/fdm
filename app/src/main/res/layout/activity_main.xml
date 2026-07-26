@@ -1,143 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Main Activity layout - 5 card design -->
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:fillViewport="true"
+    android:background="#F5F7FA">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="8dp">
 
-        <!-- Top Bar: Logo + Name | Language Switch -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="12dp"
-            android:background="#F5F5F5">
+        <!-- Card 1: Header (icon + title + language toggle) -->
+        <include
+            android:id="@+id/card_header_layout"
+            layout="@layout/card_header" />
 
-            <!-- Logo + Name (left) -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+        <!-- Card 2: Status display (frosted glass) -->
+        <include
+            android:id="@+id/card_status_layout"
+            layout="@layout/card_status" />
 
-                <ImageView
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:src="@drawable/ic_logo"
-                    android:scaleType="fitCenter"
-                    android:layout_marginEnd="8dp" />
+        <!-- Card 3: Distance & threshold -->
+        <include
+            android:id="@+id/card_distance_layout"
+            layout="@layout/card_distance" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/app_name"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333" />
-            </LinearLayout>
+        <!-- Card 4: Buttons (frosted glass) -->
+        <include
+            android:id="@+id/card_buttons_layout"
+            layout="@layout/card_buttons" />
 
-            <!-- Language Switch (right) -->
-            <Button
-                android:id="@+id/btnLangSwitch"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:text="@string/lang_switch"
-                android:textSize="14sp"
-                android:textColor="#2196F3"
-                android:backgroundTint="#E3F2FD"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp" />
-        </LinearLayout>
+        <!-- Card 5: Tip QR code -->
+        <include
+            android:id="@+id/card_tip_layout"
+            layout="@layout/card_tip" />
 
-        <!-- Main Content -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="24dp"
-            android:gravity="center_horizontal">
-
-            <!-- Status LED Indicator -->
-            <View
-                android:id="@+id/viewStatusCircle"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:background="@drawable/status_led_idle"
-                android:layout_marginBottom="12dp" />
-
-            <!-- Status Text -->
-            <TextView
-                android:id="@+id/tvStatusText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/status_idle"
-                android:textColor="#333333"
-                android:textSize="18sp"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Estimated Distance -->
-            <TextView
-                android:id="@+id/tvEstimatedDistance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/distance_info"
-                android:textColor="#2196F3"
-                android:textSize="32sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/threshold_info"
-                android:textColor="#999999"
-                android:textSize="14sp"
-                android:layout_marginBottom="24dp" />
-
-            <!-- Action Buttons -->
-            <Button
-                android:id="@+id/btnStartMonitor"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:text="@string/btn_start_monitor"
-                android:textSize="16sp"
-                android:backgroundTint="#2196F3"
-                android:textColor="#FFFFFF"
-                android:layout_marginBottom="12dp" />
-
-            <Button
-                android:id="@+id/btnRecalibrate"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:text="@string/btn_recalibrate"
-                android:textSize="16sp"
-                android:backgroundTint="#FF6B35"
-                android:textColor="#FFFFFF"
-                android:layout_marginBottom="12dp" />
-
-            <!-- Tip QR Code -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="打赏作者"
-                android:textColor="#999999"
-                android:textSize="14sp"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="8dp" />
-
-            <ImageView
-                android:layout_width="180dp"
-                android:layout_height="180dp"
-                android:src="@drawable/ic_tip_qr"
-                android:contentDescription="打赏码"
-                android:layout_marginBottom="24dp" />
-
-        </LinearLayout>
     </LinearLayout>
-</ScrollView>
+
+</androidx.core.widget.NestedScrollView>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Card 2: Status display - frosted glass effect -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="12dp"
+    android:background="@drawable/card_frosted">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="20dp"
+        android:gravity="center_vertical">
+
+        <!-- Status LED -->
+        <View
+            android:id="@+id/v_status_led"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:background="@drawable/status_led_running" />
+
+        <!-- Status Text -->
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="14dp"
+            android:text="@string/status_running"
+            android:textSize="17sp"
+            android:textColor="#2D3748"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</FrameLayout>

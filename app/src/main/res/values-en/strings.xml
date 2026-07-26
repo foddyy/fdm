@@ -26,4 +26,12 @@
 
     <!-- Language switch -->
     <string name="lang_switch">中文</string>
+    <string name="label_language">Language</string>
+    <string name="unit_cm">cm</string>
+    <string name="threshold_default">≥ 35 cm</string>
+    <string name="tip_qr_title">Tip QR Code</string>
+    <string name="tip_qr_code">Tip QR code</string>
+    <string name="btn_start">Start</string>
+    <string name="btn_calibrate_short">Calibrate</string>
+    <string name="label_threshold">Threshold</string>
 </resources>

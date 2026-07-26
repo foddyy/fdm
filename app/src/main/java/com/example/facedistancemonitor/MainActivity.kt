@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         
         // 同步Service真实运行状态到UI
-        syncServiceStateToUI()
+        syncServiceStateToUI(binding)
         
         // 回到前台时如果Service在监控但相机未工作，重启相机
         if (serviceRunning) {
@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity() {
     }
     
     /** 同步Service真实运行状态到UI */
-    private fun syncServiceStateToUI() {
+    private fun syncServiceStateToUI(binding: ActivityMainBinding) {
         val lastFrame = distanceDataStore.getLastFrameTime()
         val cameraStatus = distanceDataStore.getCameraStatus()
         val now = System.currentTimeMillis()
@@ -156,7 +156,7 @@ class MainActivity : AppCompatActivity() {
         
         if (serviceActuallyWorking != serviceRunning) {
             serviceRunning = serviceActuallyWorking
-            updateStatusUI(serviceRunning)
+            updateStatusUI(binding, serviceRunning)
         }
     }
 
@@ -172,16 +172,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Header card - app icon and title
-        binding.cardHeaderLayout.ivAppIcon.setImageResource(R.drawable.ic_logo)
-        binding.cardHeaderLayout.tvAppTitle.text = getString(R.string.app_name)
+        binding.cardHeaderLayout!!.ivAppIcon.setImageResource(R.drawable.ic_logo)
+        binding.cardHeaderLayout!!.tvAppTitle.text = getString(R.string.app_name)
 
         // Header card - language toggle
-        binding.cardHeaderLayout.btnLanguage.setOnClickListener {
+        binding.cardHeaderLayout!!.btnLanguage.setOnClickListener {
             toggleLanguage()
         }
 
         // Buttons card
-        binding.cardButtonsLayout.btnStartPause.setOnClickListener {
+        binding.cardButtonsLayout!!.btnStartPause.setOnClickListener {
             if (serviceRunning) {
                 stopMonitoring()
             } else {
@@ -189,33 +189,35 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.cardButtonsLayout.btnCalibrate.setOnClickListener {
+        binding.cardButtonsLayout!!.btnCalibrate.setOnClickListener {
             startActivity(Intent(this, CalibrationActivity::class.java))
         }
         
         updateLangButtonText()
     }
     
-    private fun updateStatusUI(isRunning: Boolean) {
+    private fun updateStatusUI(binding: ActivityMainBinding, isRunning: Boolean) {
         val statusText = if (isRunning) getString(R.string.status_running) else getString(R.string.status_idle)
-        binding.cardStatusLayout.tvStatus.text = statusText
+        binding.cardStatusLayout!!.tvStatus.text = statusText
         
         val ledDrawable = if (isRunning) {
             ContextCompat.getDrawable(this, R.drawable.status_led_running)
         } else {
             ContextCompat.getDrawable(this, R.drawable.status_led_idle)
         }
-        binding.cardStatusLayout.vStatusLed.background = ledDrawable
+        binding.cardStatusLayout!!.vStatusLed.background = ledDrawable
         
         if (isRunning) {
-            binding.cardButtonsLayout.btnStartPause.text = getString(R.string.btn_stop_monitor)
+            binding.cardButtonsLayout!!.btnStartPause.text = getString(R.string.btn_stop_monitor)
         } else {
-            binding.cardButtonsLayout.btnStartPause.text = getString(R.string.btn_start_monitor)
+            binding.cardButtonsLayout!!.btnStartPause.text = getString(R.string.btn_start_monitor)
         }
     }
 
     private fun updateLangButtonText() {
-        binding.cardHeaderLayout.btnLanguage.setImageResource(if (localeIsChinese()) R.drawable.ic_lang_en else R.drawable.ic_lang_zh)
+        binding.cardHeaderLayout?.let {
+            it.btnLanguage.setImageResource(if (localeIsChinese()) R.drawable.ic_lang_en else R.drawable.ic_lang_zh)
+        }
     }
 
     private fun toggleLanguage() {
@@ -253,8 +255,10 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun refreshAllText() {
-        updateStatusUI(serviceRunning)
-        binding.cardTipLayout.tvTipTitle.text = getString(R.string.tip_qr_title)
+        updateStatusUI(binding, serviceRunning)
+        binding.cardTipLayout?.let {
+            it.tvTipTitle.text = getString(R.string.tip_qr_title)
+        }
         updateLangButtonText()
     }
 
@@ -343,19 +347,19 @@ class MainActivity : AppCompatActivity() {
                 val now = System.currentTimeMillis()
                 val frameAgeSec = if (lastFrame > 0) ((now - lastFrame) / 1000).toInt() else -1
                 
-                if (distance >= 0) {
-                    binding.cardDistanceLayout.tvDistance.text = "$distance"
-                    // Update threshold label
-                    val threshold = distanceDataStore.getThreshold()
-                    binding.cardDistanceLayout.tvThresholdValue.text = "≥ $threshold cm"
-                } else {
-                    binding.cardDistanceLayout.tvDistance.text = "--"
-                    when {
-                        cameraStatus == "none" -> binding.cardDistanceLayout.tvDistance.text = "--"
-                        cameraStatus.startsWith("error:") -> binding.cardDistanceLayout.tvDistance.text = "Err"
-                        frameAgeSec < 0 -> binding.cardDistanceLayout.tvDistance.text = "--"
-                        frameAgeSec > 5 -> binding.cardDistanceLayout.tvDistance.text = "无信号"
-                        else -> binding.cardDistanceLayout.tvDistance.text = "--"
+                binding.cardDistanceLayout?.let { layout ->
+                    if (distance >= 0) {
+                        layout.tvDistance.text = "$distance"
+                        layout.tvThresholdValue.text = "≥ 35 cm"
+                    } else {
+                        layout.tvDistance.text = "--"
+                        when {
+                            cameraStatus == "none" -> layout.tvDistance.text = "--"
+                            cameraStatus.startsWith("error:") -> layout.tvDistance.text = "Err"
+                            frameAgeSec < 0 -> layout.tvDistance.text = "--"
+                            frameAgeSec > 5 -> layout.tvDistance.text = "无信号"
+                            else -> layout.tvDistance.text = "--"
+                        }
                     }
                 }
                 distanceUpdateHandler.postDelayed(this, DISTANCE_UPDATE_INTERVAL)

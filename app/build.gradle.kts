@@ -19,10 +19,17 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file(System.getenv("STORE_FILE") ?: project.rootProject.file("upload.keystore"))
-            storePassword = System.getenv("STORE_PASSWORD") ?: project.property("STORE_PASSWORD") as? String ?: "android"
-            keyAlias = System.getenv("KEY_ALIAS") ?: project.property("KEY_ALIAS") as? String ?: "upload"
-            keyPassword = System.getenv("KEY_PASSWORD") ?: project.property("KEY_PASSWORD") as? String ?: "android"
+            val storeFile = project.findProperty("STORE_FILE") as? String
+            val storePassword = project.findProperty("STORE_PASSWORD") as? String ?: "android"
+            val keyAlias = project.findProperty("KEY_ALIAS") as? String ?: "upload"
+            val keyPassword = project.findProperty("KEY_PASSWORD") as? String ?: "android"
+            
+            if (storeFile != null && file(storeFile).exists()) {
+                this.storeFile = file(storeFile)
+                this.storePassword = storePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
+            }
         }
     }
 
@@ -33,7 +40,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+            // 如果有签名配置则使用，否则不签名（debug APK）
+            if (signingConfigs.hasAlias("release") && signingConfigs["release"].storeFile?.exists() == true) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
         }
     }
     
@@ -64,7 +78,7 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:1.3.0")
     implementation("androidx.camera:camera-view:1.3.0")
 
-    // LifecycleService (for bindToLifecycle from Service)
+    // LifecycleService
     implementation("androidx.lifecycle:lifecycle-service:2.6.2")
 
     // ML Kit Face Detection

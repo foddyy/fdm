@@ -3,8 +3,6 @@ name: Build Android APK
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -28,9 +26,9 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon --console=plain
 
-      - name: Upload Debug APK artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
+          name: app-apk
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 30

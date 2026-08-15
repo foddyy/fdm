@@ -17,22 +17,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    signingConfigs {
-        create("release") {
-            val storeFile = project.findProperty("STORE_FILE") as? String
-            val storePassword = project.findProperty("STORE_PASSWORD") as? String ?: "android"
-            val keyAlias = project.findProperty("KEY_ALIAS") as? String ?: "upload"
-            val keyPassword = project.findProperty("KEY_PASSWORD") as? String ?: "android"
-            
-            if (storeFile != null && file(storeFile).exists()) {
-                this.storeFile = file(storeFile)
-                this.storePassword = storePassword
-                this.keyAlias = keyAlias
-                this.keyPassword = keyPassword
-            }
-        }
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -40,10 +24,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // 如果有签名配置则使用，否则不签名（debug APK）
-            if (signingConfigs.hasAlias("release") && signingConfigs["release"].storeFile?.exists() == true) {
-                signingConfig = signingConfigs.getByName("release")
-            }
         }
         debug {
             applicationIdSuffix = ".debug"

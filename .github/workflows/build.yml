@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # 手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -22,25 +22,37 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Generate signing keystore
+        run: |
+          mkdir -p ~/.android
+          keytool -genkeypair -v \
+            -keystore $GITHUB_WORKSPACE/upload.keystore \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -alias upload \
+            -storepass android \
+            -keypass android \
+            -dname "CN=FaceDistanceMonitor, OU=Dev, O=Personal"
+          echo "STORE_FILE=$GITHUB_WORKSPACE/upload.keystore" >> $GITHUB_ENV
+          echo "STORE_PASSWORD=android" >> $GITHUB_ENV
+          echo "KEY_ALIAS=upload" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=android" >> $GITHUB_ENV
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --console=plain
-        timeout-minutes: 30
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --no-daemon --console=plain
 
       - name: List APK outputs
         run: |
           echo "=== Finding APK files ==="
           find app/build/outputs -name "*.apk" -type f 2>/dev/null || echo "No APK files found"
-          ls -la app/build/outputs/apk/debug/ 2>/dev/null || echo "debug dir not found"
-          ls -la app/build/outputs/apk/ 2>/dev/null || echo "apk dir not found"
+          ls -la app/build/outputs/apk/release/ 2>/dev/null || echo "release dir not found"
 
-      - name: Upload APK artifact
+      - name: Upload Release APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
+          name: app-release-apk
           path: |
-            app/build/outputs/apk/debug/*.apk
-            app/build/outputs/apk/**/*.apk
+            app/build/outputs/apk/release/*.apk
           retention-days: 30

@@ -67,3 +67,10 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
+
+android {
+    // 禁用 PNG 优化，避免颜色失真
+    aaptOptions {
+        cruncherEnabled = false
+    }
+}

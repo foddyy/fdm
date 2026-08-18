@@ -18,16 +18,12 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Clean build cache
-        run: ./gradlew clean
-
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --console=plain
+        run: ./gradlew assembleDebug --no-daemon --no-build-cache --console=plain
 
       - name: Rename APK
         run: |

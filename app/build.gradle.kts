@@ -29,19 +29,24 @@ android {
             // 不添加后缀
         }
     }
-    
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    
+
     kotlinOptions {
         jvmTarget = "17"
     }
-    
+
     buildFeatures {
         viewBinding = true
         dataBinding = true
+    }
+
+    // 禁用 PNG 压缩，避免图标颜色失真
+    aaptOptions {
+        cruncherEnabled = false
     }
 }
 
@@ -66,11 +71,4 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-}
-
-android {
-    // 禁用 PNG 优化，避免颜色失真
-    aaptOptions {
-        cruncherEnabled = false
-    }
 }

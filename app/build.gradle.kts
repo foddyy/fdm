@@ -43,11 +43,6 @@ android {
         viewBinding = true
         dataBinding = true
     }
-
-    // 禁用 PNG 压缩，避免图标颜色失真
-    aaptOptions {
-        cruncherEnabled = false
-    }
 }
 
 dependencies {

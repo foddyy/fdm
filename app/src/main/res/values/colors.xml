@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="red">#FFFF0000</color>
-    <color name="dark_red">#FF8B0000</color>
-    <color name="semi_transparent_red">#88FF0000</color>
-    <color name="bg_dark">#FF1A1A2E</color>
-    <color name="accent_blue">#FF00B4D8</color>
+    <!-- 自适应图标背景色，根据需要修改 -->
+    <color name="ic_launcher_background">#FFFFFF</color>
 </resources>

@@ -192,8 +192,35 @@ class MainActivity : AppCompatActivity() {
         binding.cardButtonsLayout!!.btnCalibrate.setOnClickListener {
             startActivity(Intent(this, CalibrationActivity::class.java))
         }
-        
+
+        // Author buttons
+        binding.cardAuthorButtonsLayout!!.btnFollowAuthor.setOnClickListener {
+            openWeChatArticle(getString(R.string.url_wechat_profile))
+        }
+
+        binding.cardAuthorButtonsLayout!!.btnFeedbackTip.setOnClickListener {
+            openWeChatArticle(getString(R.string.url_feedback_article))
+        }
+
         updateLangButtonText()
+    }
+
+    private fun openWeChatArticle(url: String) {
+        val packageManager = packageManager
+        val weChatPackage = "com.tencent.mm"
+
+        try {
+            // 检查微信是否安装
+            packageManager.getPackageInfo(weChatPackage, 0)
+            // 微信已安装，尝试用微信打开
+            val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url))
+            intent.setPackage(weChatPackage)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+        } catch (e: Exception) {
+            // 微信未安装，用浏览器打开
+            startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)))
+        }
     }
     
     private fun updateStatusUI(binding: ActivityMainBinding, isRunning: Boolean) {

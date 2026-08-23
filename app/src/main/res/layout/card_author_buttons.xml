@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Card 6: Author & Feedback Buttons -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="12dp"
+    android:layout_marginBottom="16dp"
+    android:background="@drawable/card_frosted">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center">
+
+        <!-- Follow Author Button -->
+        <Button
+            android:id="@+id/btn_follow_author"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="@string/btn_follow_author"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#319795" />
+
+        <!-- Feedback/Tip Button -->
+        <Button
+            android:id="@+id/btn_feedback_tip"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="@string/btn_feedback_tip"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#319795"
+            android:backgroundTint="#E6FFFA" />
+
+    </LinearLayout>
+
+</FrameLayout>

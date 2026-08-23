@@ -39,6 +39,11 @@
             android:id="@+id/card_tip_layout"
             layout="@layout/card_tip" />
 
+        <!-- Card 6: Author & Feedback Buttons -->
+        <include
+            android:id="@+id/card_author_buttons_layout"
+            layout="@layout/card_author_buttons" />
+
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>

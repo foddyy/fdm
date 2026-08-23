@@ -100,8 +100,7 @@
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
                 android:backgroundTint="#319795"
-                android:elevation="4dp"
-                android:layout_elevation="4dp" />
+                android:elevation="4dp" />
 
             <Button
                 android:id="@+id/btn_calibrate"
@@ -114,8 +113,7 @@
                 android:textStyle="bold"
                 android:textColor="#319795"
                 android:backgroundTint="#E6FFFA"
-                android:elevation="4dp"
-                android:layout_elevation="4dp" />
+                android:elevation="4dp" />
 
         </LinearLayout>
 
@@ -131,7 +129,6 @@
             android:textColor="#FFFFFF"
             android:backgroundTint="#319795"
             android:elevation="4dp"
-            android:layout_elevation="4dp"
             android:layout_marginBottom="32dp" />
 
     </LinearLayout>

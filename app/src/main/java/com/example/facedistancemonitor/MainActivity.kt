@@ -3,6 +3,7 @@ package com.example.facedistancemonitor
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -10,7 +11,6 @@ import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,12 +25,12 @@ class MainActivity : AppCompatActivity() {
     private var distanceUpdateRunnable: Runnable? = null
     private var serviceRunning = false
     
-    private lateinit var ivAppIcon: ImageView
     private lateinit var tvAppTitle: TextView
     private lateinit var btnLanguage: Button
     private lateinit var tvDistance: TextView
     private lateinit var btnStartPause: Button
     private lateinit var btnCalibrate: Button
+    private lateinit var btnFeedbackTip: Button
 
     companion object {
         const val REQUEST_CODE_PERMISSIONS = 100
@@ -67,18 +67,17 @@ class MainActivity : AppCompatActivity() {
         
         setContentView(R.layout.activity_main)
         
-        ivAppIcon = findViewById(R.id.iv_app_icon)
         tvAppTitle = findViewById(R.id.tv_app_title)
         btnLanguage = findViewById(R.id.btn_language)
         tvDistance = findViewById(R.id.tv_distance)
         btnStartPause = findViewById(R.id.btn_start_pause)
         btnCalibrate = findViewById(R.id.btn_calibrate)
+        btnFeedbackTip = findViewById(R.id.btn_feedback_tip)
         
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())
         
         // Setup UI
-        ivAppIcon.setImageResource(R.drawable.ic_logo)
         tvAppTitle.text = getString(R.string.app_name)
         btnLanguage.setOnClickListener { toggleLanguage() }
         
@@ -95,6 +94,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, CalibrationActivity::class.java))
         }
         
+        btnFeedbackTip.setOnClickListener {
+            openWeChatArticle(getString(R.string.url_feedback_article))
+        }
+        
         updateLangButtonText()
         
         // Check calibration and permissions
@@ -109,6 +112,19 @@ class MainActivity : AppCompatActivity() {
             requestAllPermissions {
                 startDistanceUpdates()
             }
+        }
+    }
+    
+    private fun openWeChatArticle(url: String) {
+        try {
+            // 尝试用微信打开
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            intent.setPackage("com.tencent.mm")
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+        } catch (e: Exception) {
+            // 微信未安装，用浏览器打开
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         }
     }
     
@@ -252,7 +268,7 @@ class MainActivity : AppCompatActivity() {
             if (!Settings.canDrawOverlays(this)) {
                 val intent = Intent(
                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    android.net.Uri.parse("package:$packageName")
+                    Uri.parse("package:$packageName")
                 )
                 overlayPermissionLauncher.launch(intent)
                 return

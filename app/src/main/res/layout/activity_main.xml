@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Main Activity layout - simplified, no cards -->
+<!-- Main Activity layout - simplified design -->
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -13,7 +13,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Header: icon + title + language -->
+        <!-- Header: title + language toggle -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,14 +21,6 @@
             android:gravity="center_vertical"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp">
-
-            <ImageView
-                android:id="@+id/iv_app_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_logo"
-                android:scaleType="centerCrop"
-                android:layout_marginEnd="12dp" />
 
             <TextView
                 android:id="@+id/tv_app_title"
@@ -42,76 +34,104 @@
 
             <Button
                 android:id="@+id/btn_language"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_width="60dp"
+                android:layout_height="28dp"
                 android:text="EN"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
                 android:textColor="#319795"
                 android:backgroundTint="#E6FFFA"
-                android:paddingHorizontal="10dp" />
+                android:padding="0dp" />
 
         </LinearLayout>
 
-        <!-- Distance display (no card background) -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="估算距离"
-            android:textSize="14sp"
-            android:textColor="#718096"
-            android:layout_marginBottom="4dp" />
-
-        <TextView
-            android:id="@+id/tv_distance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="--"
-            android:textSize="72sp"
-            android:textStyle="bold"
-            android:textColor="#319795"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="cm"
-            android:textSize="20sp"
-            android:textColor="#A0AEC0"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Threshold info -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="安全阈值: ≥ 35 cm"
-            android:textSize="15sp"
-            android:textColor="#ED8936"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Start/Pause button (large, prominent) -->
-        <Button
-            android:id="@+id/btn_start_pause"
+        <!-- Distance display box -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="开始监控"
-            android:textSize="18sp"
+            android:layout_height="140dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/box_rounded_light">
+
+            <TextView
+                android:id="@+id/tv_distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="35"
+                android:textSize="64sp"
+                android:textStyle="bold"
+                android:textColor="#319795" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|start"
+                android:layout_margin="16dp"
+                android:text="实时距离"
+                android:textSize="14sp"
+                android:textColor="#718096" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="16dp"
+                android:text="建议35cm，不小于30cm"
+                android:textSize="12sp"
+                android:textColor="#718096" />
+
+        </FrameLayout>
+
+        <!-- Two buttons: start/pause and calibrate -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="24dp">
+
+            <Button
+                android:id="@+id/btn_start_pause"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="开始监控"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#319795"
+                android:elevation="4dp"
+                android:layout_elevation="4dp" />
+
+            <Button
+                android:id="@+id/btn_calibrate"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="重新校准"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#319795"
+                android:backgroundTint="#E6FFFA"
+                android:elevation="4dp"
+                android:layout_elevation="4dp" />
+
+        </LinearLayout>
+
+        <!-- Bottom button: feedback/tip -->
+        <Button
+            android:id="@+id/btn_feedback_tip"
+            android:layout_width="215dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_horizontal"
+            android:text="反馈/打赏"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
             android:backgroundTint="#319795"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Calibrate button (smaller, secondary) -->
-        <Button
-            android:id="@+id/btn_calibrate"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="点击校准"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#319795"
-            android:backgroundTint="#E6FFFA"
+            android:elevation="4dp"
+            android:layout_elevation="4dp"
             android:layout_marginBottom="32dp" />
 
     </LinearLayout>

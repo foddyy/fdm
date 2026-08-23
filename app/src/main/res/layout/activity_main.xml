@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Main Activity layout - 5 card design -->
+<!-- Main Activity layout - simplified, no cards -->
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -12,37 +11,108 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="8dp">
+        android:padding="16dp">
 
-        <!-- Card 1: Header (icon + title + language toggle) -->
-        <include
-            android:id="@+id/card_header_layout"
-            layout="@layout/card_header" />
+        <!-- Header: icon + title + language -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp">
 
-        <!-- Card 2: Status display (frosted glass) -->
-        <include
-            android:id="@+id/card_status_layout"
-            layout="@layout/card_status" />
+            <ImageView
+                android:id="@+id/iv_app_icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_logo"
+                android:scaleType="centerCrop"
+                android:layout_marginEnd="12dp" />
 
-        <!-- Card 3: Distance & threshold -->
-        <include
-            android:id="@+id/card_distance_layout"
-            layout="@layout/card_distance" />
+            <TextView
+                android:id="@+id/tv_app_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="爱眼"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#2D3748" />
 
-        <!-- Card 4: Buttons (frosted glass) -->
-        <include
-            android:id="@+id/card_buttons_layout"
-            layout="@layout/card_buttons" />
+            <Button
+                android:id="@+id/btn_language"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="EN"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#319795"
+                android:backgroundTint="#E6FFFA"
+                android:paddingHorizontal="10dp" />
 
-        <!-- Card 5: Tip QR code -->
-        <include
-            android:id="@+id/card_tip_layout"
-            layout="@layout/card_tip" />
+        </LinearLayout>
 
-        <!-- Card 6: Author & Feedback Buttons -->
-        <include
-            android:id="@+id/card_author_buttons_layout"
-            layout="@layout/card_author_buttons" />
+        <!-- Distance display (no card background) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="估算距离"
+            android:textSize="14sp"
+            android:textColor="#718096"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/tv_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="--"
+            android:textSize="72sp"
+            android:textStyle="bold"
+            android:textColor="#319795"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="cm"
+            android:textSize="20sp"
+            android:textColor="#A0AEC0"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Threshold info -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="安全阈值: ≥ 35 cm"
+            android:textSize="15sp"
+            android:textColor="#ED8936"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Start/Pause button (large, prominent) -->
+        <Button
+            android:id="@+id/btn_start_pause"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="开始监控"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#319795"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Calibrate button (smaller, secondary) -->
+        <Button
+            android:id="@+id/btn_calibrate"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="点击校准"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#319795"
+            android:backgroundTint="#E6FFFA"
+            android:layout_marginBottom="32dp" />
 
     </LinearLayout>
 

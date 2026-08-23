@@ -117,21 +117,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         
-        // 同步Service真实运行状态到UI
-        syncServiceStateToUI(binding)
-        
-        // 回到前台时如果Service在监控但相机未工作，重启相机
-        if (serviceRunning) {
-            val cameraStatus = distanceDataStore.getCameraStatus()
-            if (cameraStatus != "ready") {
-                android.util.Log.d("MainActivity", "Restarting camera on resume, current status: $cameraStatus")
-                val intent = Intent(this, DistanceMonitorService::class.java).apply {
-                    action = "ACTION_RESTART_CAMERA"
-                }
-                startService(intent)
-            }
-        }
-        
         if (!setupUICalled) {
             val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .contains("baseline_eye_distance_px")
@@ -141,22 +126,6 @@ class MainActivity : AppCompatActivity() {
                 startDistanceUpdates()
                 setupUICalled = true
             }
-        }
-    }
-    
-    /** 同步Service真实运行状态到UI */
-    private fun syncServiceStateToUI(binding: ActivityMainBinding) {
-        val lastFrame = distanceDataStore.getLastFrameTime()
-        val cameraStatus = distanceDataStore.getCameraStatus()
-        val now = System.currentTimeMillis()
-        val frameAgeMs = if (lastFrame > 0) now - lastFrame else -1
-        
-        // 判断Service是否真的在监控：相机状态为ready 且 帧在10秒内有更新
-        val serviceActuallyWorking = cameraStatus == "ready" && (frameAgeMs < 0 || frameAgeMs < 10000)
-        
-        if (serviceActuallyWorking != serviceRunning) {
-            serviceRunning = serviceActuallyWorking
-            updateStatusUI(binding, serviceRunning)
         }
     }
 
@@ -172,16 +141,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Header card - app icon and title
-        binding.cardHeaderLayout!!.ivAppIcon.setImageResource(R.drawable.ic_logo)
-        binding.cardHeaderLayout!!.tvAppTitle.text = getString(R.string.app_name)
+        binding.ivAppIcon.setImageResource(R.drawable.ic_logo)
+        binding.tvAppTitle.text = getString(R.string.app_name)
 
         // Header card - language toggle
-        binding.cardHeaderLayout!!.btnLanguage.setOnClickListener {
+        binding.btnLanguage.setOnClickListener {
             toggleLanguage()
         }
 
-        // Buttons card
-        binding.cardButtonsLayout!!.btnStartPause.setOnClickListener {
+        // Start/Pause button
+        binding.btnStartPause.setOnClickListener {
             if (serviceRunning) {
                 stopMonitoring()
             } else {
@@ -189,62 +158,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.cardButtonsLayout!!.btnCalibrate.setOnClickListener {
+        // Calibrate button
+        binding.btnCalibrate.setOnClickListener {
             startActivity(Intent(this, CalibrationActivity::class.java))
         }
-
-        // Author buttons
-        binding.cardAuthorButtonsLayout!!.btnFollowAuthor.setOnClickListener {
-            openWeChatArticle(getString(R.string.url_wechat_profile))
-        }
-
-        binding.cardAuthorButtonsLayout!!.btnFeedbackTip.setOnClickListener {
-            openWeChatArticle(getString(R.string.url_feedback_article))
-        }
-
+        
         updateLangButtonText()
     }
 
-    private fun openWeChatArticle(url: String) {
-        val packageManager = packageManager
-        val weChatPackage = "com.tencent.mm"
-
-        try {
-            // 检查微信是否安装
-            packageManager.getPackageInfo(weChatPackage, 0)
-            // 微信已安装，尝试用微信打开
-            val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url))
-            intent.setPackage(weChatPackage)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-        } catch (e: Exception) {
-            // 微信未安装，用浏览器打开
-            startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)))
-        }
-    }
-    
-    private fun updateStatusUI(binding: ActivityMainBinding, isRunning: Boolean) {
-        val statusText = if (isRunning) getString(R.string.status_running) else getString(R.string.status_idle)
-        binding.cardStatusLayout!!.tvStatus.text = statusText
-        
-        val ledDrawable = if (isRunning) {
-            ContextCompat.getDrawable(this, R.drawable.status_led_running)
-        } else {
-            ContextCompat.getDrawable(this, R.drawable.status_led_idle)
-        }
-        binding.cardStatusLayout!!.vStatusLed.background = ledDrawable
-        
-        if (isRunning) {
-            binding.cardButtonsLayout!!.btnStartPause.text = getString(R.string.btn_stop_monitor)
-        } else {
-            binding.cardButtonsLayout!!.btnStartPause.text = getString(R.string.btn_start_monitor)
-        }
-    }
-
     private fun updateLangButtonText() {
-        binding.cardHeaderLayout?.let {
-            it.btnLanguage.text = if (localeIsChinese()) "EN" else "中文"
-        }
+        binding.btnLanguage.text = if (localeIsChinese()) "EN" else "中文"
     }
 
     private fun toggleLanguage() {
@@ -270,43 +193,17 @@ class MainActivity : AppCompatActivity() {
             .apply()
     }
 
-    private fun restoreLanguage() {
-        val lang = getSharedPreferences("app_prefs", MODE_PRIVATE)
-            .getString("app_locale", null)
-        if (lang != null) {
-            val locale = java.util.Locale(lang)
-            val config = resources.configuration
-            config.setLocale(locale)
-            resources.updateConfiguration(config, resources.displayMetrics)
-        }
-    }
-    
     private fun refreshAllText() {
         // Update header
-        binding.cardHeaderLayout?.let {
-            it.tvAppTitle.text = getString(R.string.app_name)
-        }
+        binding.tvAppTitle.text = getString(R.string.app_name)
         updateLangButtonText()
         
-        // Update status card
-        updateStatusUI(binding, serviceRunning)
-        
-        // Update distance card
-        binding.cardDistanceLayout?.let {
-            it.tvThresholdLabel.text = getString(R.string.label_threshold)
-            it.tvThresholdValue.text = getString(R.string.threshold_default)
-        }
-        
         // Update buttons
-        binding.cardButtonsLayout?.let {
-            it.btnStartPause.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
-            it.btnCalibrate.text = getString(R.string.btn_calibrate)
-        }
+        binding.btnStartPause.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
+        binding.btnCalibrate.text = getString(R.string.btn_calibrate)
         
-        // Update tip card
-        binding.cardTipLayout?.let {
-            it.tvTipTitle.text = getString(R.string.tip_qr_title)
-        }
+        // Update threshold
+        binding.tvDistance.text = "--"
     }
 
     private fun hasAllPermissions(): Boolean {
@@ -366,7 +263,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         serviceRunning = true
-        updateStatusUI(binding, true)
+        updateStartPauseButton(true)
     }
 
     private fun stopMonitoring() {
@@ -376,12 +273,22 @@ class MainActivity : AppCompatActivity() {
         startService(intent)
 
         serviceRunning = false
-        updateStatusUI(binding, false)
+        updateStartPauseButton(false)
         
         distanceUpdateRunnable?.let { 
             distanceUpdateHandler.removeCallbacks(it)
         }
         distanceUpdateRunnable = null
+    }
+    
+    private fun updateStartPauseButton(isRunning: Boolean) {
+        if (isRunning) {
+            binding.btnStartPause.text = getString(R.string.btn_stop_monitor)
+            binding.btnStartPause.alpha = 1.0f
+        } else {
+            binding.btnStartPause.text = getString(R.string.btn_start_monitor)
+            binding.btnStartPause.alpha = 0.7f
+        }
     }
     
     private fun startDistanceUpdates() {
@@ -394,21 +301,16 @@ class MainActivity : AppCompatActivity() {
                 val now = System.currentTimeMillis()
                 val frameAgeSec = if (lastFrame > 0) ((now - lastFrame) / 1000).toInt() else -1
                 
-                binding.cardDistanceLayout?.let { layout ->
-                    if (distance >= 0) {
-                        layout.tvDistance.text = "$distance"
-                        layout.tvThresholdValue.text = "≥ 35 cm"
-                    } else {
-                        layout.tvDistance.text = "--"
-                        when {
-                            cameraStatus == "none" -> layout.tvDistance.text = "--"
-                            cameraStatus.startsWith("error:") -> layout.tvDistance.text = "Err"
-                            frameAgeSec < 0 -> layout.tvDistance.text = "--"
-                            frameAgeSec > 5 -> layout.tvDistance.text = getString(R.string.status_no_signal)
-                            else -> layout.tvDistance.text = "--"
-                        }
+                binding.tvDistance.text = if (distance >= 0) "$distance" else {
+                    when {
+                        cameraStatus == "none" -> "--"
+                        cameraStatus.startsWith("error:") -> "Err"
+                        frameAgeSec < 0 -> "--"
+                        frameAgeSec > 5 -> getString(R.string.status_no_signal)
+                        else -> "--"
                     }
                 }
+                
                 distanceUpdateHandler.postDelayed(this, DISTANCE_UPDATE_INTERVAL)
             }
         }

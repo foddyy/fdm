@@ -9,20 +9,28 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.View
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.example.facedistancemonitor.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
     private lateinit var distanceDataStore: DistanceDataStore
     private lateinit var distanceUpdateHandler: Handler
     private val DISTANCE_UPDATE_INTERVAL = 500L
     private var distanceUpdateRunnable: Runnable? = null
     private var serviceRunning = false
+    
+    private lateinit var ivAppIcon: ImageView
+    private lateinit var tvAppTitle: TextView
+    private lateinit var btnLanguage: Button
+    private lateinit var tvDistance: TextView
+    private lateinit var btnStartPause: Button
+    private lateinit var btnCalibrate: Button
 
     companion object {
         const val REQUEST_CODE_PERMISSIONS = 100
@@ -57,12 +65,39 @@ class MainActivity : AppCompatActivity() {
         
         restoreLanguage()
         
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
+        setContentView(R.layout.activity_main)
+        
+        ivAppIcon = findViewById(R.id.iv_app_icon)
+        tvAppTitle = findViewById(R.id.tv_app_title)
+        btnLanguage = findViewById(R.id.btn_language)
+        tvDistance = findViewById(R.id.tv_distance)
+        btnStartPause = findViewById(R.id.btn_start_pause)
+        btnCalibrate = findViewById(R.id.btn_calibrate)
+        
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())
         
+        // Setup UI
+        ivAppIcon.setImageResource(R.drawable.ic_logo)
+        tvAppTitle.text = getString(R.string.app_name)
+        btnLanguage.setOnClickListener { toggleLanguage() }
+        
+        // Setup buttons
+        btnStartPause.setOnClickListener {
+            if (serviceRunning) {
+                stopMonitoring()
+            } else {
+                startMonitoring()
+            }
+        }
+        
+        btnCalibrate.setOnClickListener {
+            startActivity(Intent(this, CalibrationActivity::class.java))
+        }
+        
+        updateLangButtonText()
+        
+        // Check calibration and permissions
         val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .contains("baseline_eye_distance_px")
         
@@ -72,7 +107,6 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             requestAllPermissions {
-                setupUI()
                 startDistanceUpdates()
             }
         }
@@ -111,63 +145,30 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-    private var setupUICalled = false
     
     override fun onResume() {
         super.onResume()
-        
-        if (!setupUICalled) {
-            val isCalibrated = getSharedPreferences("app_prefs", MODE_PRIVATE)
-                .contains("baseline_eye_distance_px")
-            
-            if (isCalibrated) {
-                setupUI()
-                startDistanceUpdates()
-                setupUICalled = true
-            }
-        }
+        syncServiceStateToUI()
     }
-
-    private fun setupUI() {
-        if (!hasAllPermissions()) {
-            requestPermissions()
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                // Will request when user tries to start monitoring
-            }
-        }
-
-        // Header card - app icon and title
-        binding.ivAppIcon.setImageResource(R.drawable.ic_logo)
-        binding.tvAppTitle.text = getString(R.string.app_name)
-
-        // Header card - language toggle
-        binding.btnLanguage.setOnClickListener {
-            toggleLanguage()
-        }
-
-        // Start/Pause button
-        binding.btnStartPause.setOnClickListener {
-            if (serviceRunning) {
-                stopMonitoring()
-            } else {
-                startMonitoring()
-            }
-        }
-
-        // Calibrate button
-        binding.btnCalibrate.setOnClickListener {
-            startActivity(Intent(this, CalibrationActivity::class.java))
-        }
+    
+    /** 同步Service真实运行状态到UI */
+    private fun syncServiceStateToUI() {
+        val lastFrame = distanceDataStore.getLastFrameTime()
+        val cameraStatus = distanceDataStore.getCameraStatus()
+        val now = System.currentTimeMillis()
+        val frameAgeMs = if (lastFrame > 0) now - lastFrame else -1
         
-        updateLangButtonText()
+        // 判断Service是否真的在监控
+        val serviceActuallyWorking = cameraStatus == "ready" && (frameAgeMs < 0 || frameAgeMs < 10000)
+        
+        if (serviceActuallyWorking != serviceRunning) {
+            serviceRunning = serviceActuallyWorking
+            updateStartPauseButton(serviceRunning)
+        }
     }
 
     private fun updateLangButtonText() {
-        binding.btnLanguage.text = if (localeIsChinese()) "EN" else "中文"
+        btnLanguage.text = if (localeIsChinese()) "EN" else "中文"
     }
 
     private fun toggleLanguage() {
@@ -193,17 +194,23 @@ class MainActivity : AppCompatActivity() {
             .apply()
     }
 
+    private fun restoreLanguage() {
+        val lang = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            .getString("app_locale", null)
+        if (lang != null) {
+            val locale = java.util.Locale(lang)
+            val config = resources.configuration
+            config.setLocale(locale)
+            resources.updateConfiguration(config, resources.displayMetrics)
+        }
+    }
+    
     private fun refreshAllText() {
-        // Update header
-        binding.tvAppTitle.text = getString(R.string.app_name)
+        tvAppTitle.text = getString(R.string.app_name)
         updateLangButtonText()
-        
-        // Update buttons
-        binding.btnStartPause.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
-        binding.btnCalibrate.text = getString(R.string.btn_calibrate)
-        
-        // Update threshold
-        binding.tvDistance.text = "--"
+        btnStartPause.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
+        btnCalibrate.text = getString(R.string.btn_calibrate)
+        tvDistance.text = "--"
     }
 
     private fun hasAllPermissions(): Boolean {
@@ -283,11 +290,11 @@ class MainActivity : AppCompatActivity() {
     
     private fun updateStartPauseButton(isRunning: Boolean) {
         if (isRunning) {
-            binding.btnStartPause.text = getString(R.string.btn_stop_monitor)
-            binding.btnStartPause.alpha = 1.0f
+            btnStartPause.text = getString(R.string.btn_stop_monitor)
+            btnStartPause.alpha = 1.0f
         } else {
-            binding.btnStartPause.text = getString(R.string.btn_start_monitor)
-            binding.btnStartPause.alpha = 0.7f
+            btnStartPause.text = getString(R.string.btn_start_monitor)
+            btnStartPause.alpha = 0.7f
         }
     }
     
@@ -301,7 +308,7 @@ class MainActivity : AppCompatActivity() {
                 val now = System.currentTimeMillis()
                 val frameAgeSec = if (lastFrame > 0) ((now - lastFrame) / 1000).toInt() else -1
                 
-                binding.tvDistance.text = if (distance >= 0) "$distance" else {
+                tvDistance.text = if (distance >= 0) "$distance" else {
                     when {
                         cameraStatus == "none" -> "--"
                         cameraStatus.startsWith("error:") -> "Err"

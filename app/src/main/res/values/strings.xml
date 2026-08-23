@@ -31,7 +31,7 @@
     <string name="threshold_default">≥ 35 cm</string>
     <string name="btn_follow_author">关注作者</string>
     <string name="btn_feedback_tip">反馈/打赏</string>
-    <string name="url_wechat_profile">https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzYyMjQzOTczNw&scene=124#wechat_redirect</string>
+    <string name="url_wechat_profile">https://mp.weixin.qq.com/mp/profile_ext?action=home&amp;__biz=MzYyMjQzOTczNw&amp;scene=124#wechat_redirect</string>
     <string name="url_feedback_article">https://mp.weixin.qq.com/s/po-c1QrTt3FrRsNJlaZneA</string>
     <string name="btn_start">开始监测</string>
     <string name="btn_calibrate_short">校准距离</string>

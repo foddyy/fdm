@@ -40,8 +40,9 @@
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:textColor="#319795"
-                android:backgroundTint="#E6FFFA"
-                android:padding="0dp" />
+                android:background="@drawable/btn_background_light"
+                android:padding="0dp"
+                android:elevation="2dp" />
 
         </LinearLayout>
 
@@ -87,7 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="16dp">
 
             <Button
                 android:id="@+id/btn_start_pause"
@@ -99,7 +100,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                android:backgroundTint="#319795"
+                android:background="@drawable/btn_background_dark"
                 android:elevation="4dp" />
 
             <Button
@@ -112,23 +113,23 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="#319795"
-                android:backgroundTint="#E6FFFA"
-                android:elevation="4dp" />
+                android:background="@drawable/btn_background_light"
+                android:elevation="2dp" />
 
         </LinearLayout>
 
-        <!-- Bottom button: feedback/tip -->
+        <!-- Bottom button: feedback/tip (right aligned) -->
         <Button
             android:id="@+id/btn_feedback_tip"
-            android:layout_width="215dp"
+            android:layout_width="180dp"
             android:layout_height="48dp"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="end"
             android:text="反馈/打赏"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#319795"
-            android:elevation="4dp"
+            android:background="@drawable/btn_background_dark"
+            android:elevation="2dp"
             android:layout_marginBottom="32dp" />
 
     </LinearLayout>

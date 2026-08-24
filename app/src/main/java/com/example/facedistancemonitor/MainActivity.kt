@@ -307,10 +307,12 @@ class MainActivity : AppCompatActivity() {
     private fun updateStartPauseButton(isRunning: Boolean) {
         if (isRunning) {
             btnStartPause.text = getString(R.string.btn_stop_monitor)
-            btnStartPause.alpha = 1.0f
+            btnStartPause.setBackgroundResource(R.drawable.btn_background_dark)
         } else {
             btnStartPause.text = getString(R.string.btn_start_monitor)
-            btnStartPause.alpha = 0.7f
+            // 使用稍深的颜色表示停止状态
+            btnStartPause.setBackgroundResource(R.drawable.btn_background_dark)
+            btnStartPause.alpha = 0.85f
         }
     }
     

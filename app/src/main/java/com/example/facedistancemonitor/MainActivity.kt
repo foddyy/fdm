@@ -314,15 +314,10 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun updateStartPauseButton(isRunning: Boolean) {
-        if (isRunning) {
-            btnStartPause.text = getString(R.string.btn_stop_monitor)
-            btnStartPause.setBackgroundResource(R.drawable.btn_background_dark)
-            btnStartPause.setTextColor(resources.getColor(R.color.white, null))
-        } else {
-            btnStartPause.text = getString(R.string.btn_start_monitor)
-            btnStartPause.setBackgroundResource(R.drawable.btn_background_light)
-            btnStartPause.setTextColor(resources.getColor(R.color.teal_700, null))
-        }
+        // 所有按钮统一使用浅色背景
+        btnStartPause.text = if (isRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
+        btnStartPause.setBackgroundResource(R.drawable.btn_background_light)
+        btnStartPause.setTextColor(resources.getColor(R.color.teal_700, null))
     }
     
     private fun startDistanceUpdates() {

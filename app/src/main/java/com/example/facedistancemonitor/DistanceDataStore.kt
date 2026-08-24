@@ -7,11 +7,20 @@ class DistanceDataStore(private val context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("distance_data", Context.MODE_PRIVATE)
     
     fun saveDistance(distanceCm: Int) {
-        prefs.edit().putInt("current_distance_cm", distanceCm).apply()
+        prefs.edit()
+            .putInt("current_distance_cm", distanceCm)
+            .putLong("last_distance_time", System.currentTimeMillis())
+            .apply()
     }
     
     fun getDistance(): Int {
-        return prefs.getInt("current_distance_cm", -1)
+        val distance = prefs.getInt("current_distance_cm", -1)
+        val lastTime = prefs.getLong("last_distance_time", 0)
+        // 如果最后更新时间在10秒内，返回距离；否则返回-1（表示信号丢失）
+        if (distance >= 0 && System.currentTimeMillis() - lastTime < 10000) {
+            return distance
+        }
+        return -1
     }
     
     fun markFrameProcessed() {

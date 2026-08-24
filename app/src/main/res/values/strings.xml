@@ -33,6 +33,8 @@
     <string name="btn_feedback_tip">反馈/打赏</string>
     <string name="url_wechat_profile">https://mp.weixin.qq.com/mp/profile_ext?action=home&amp;__biz=MzYyMjQzOTczNw&amp;scene=124#wechat_redirect</string>
     <string name="url_feedback_article">https://mp.weixin.qq.com/s/po-c1QrTt3FrRsNJlaZneA</string>
+    <string name="label_realtime_distance">实时距离</string>
+    <string name="label_distance_recommendation">建议35cm，不小于30cm</string>
     <string name="tip_qr_title">打赏码</string>
     <string name="tip_qr_code">打赏二维码</string>
     <string name="btn_start">开始监测</string>

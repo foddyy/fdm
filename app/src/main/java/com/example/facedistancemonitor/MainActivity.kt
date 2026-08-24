@@ -28,6 +28,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvAppTitle: TextView
     private lateinit var btnLanguage: Button
     private lateinit var tvDistance: TextView
+    private lateinit var tvDistanceLabel: TextView
+    private lateinit var tvDistanceRecommendation: TextView
     private lateinit var btnStartPause: Button
     private lateinit var btnCalibrate: Button
     private lateinit var btnFeedbackTip: Button
@@ -70,6 +72,8 @@ class MainActivity : AppCompatActivity() {
         tvAppTitle = findViewById(R.id.tv_app_title)
         btnLanguage = findViewById(R.id.btn_language)
         tvDistance = findViewById(R.id.tv_distance)
+        tvDistanceLabel = findViewById(R.id.tv_distance_label)
+        tvDistanceRecommendation = findViewById(R.id.tv_distance_recommendation)
         btnStartPause = findViewById(R.id.btn_start_pause)
         btnCalibrate = findViewById(R.id.btn_calibrate)
         btnFeedbackTip = findViewById(R.id.btn_feedback_tip)
@@ -80,6 +84,8 @@ class MainActivity : AppCompatActivity() {
         // Setup UI
         tvAppTitle.text = getString(R.string.app_name)
         btnLanguage.setOnClickListener { toggleLanguage() }
+        tvDistanceLabel.text = getString(R.string.label_realtime_distance)
+        tvDistanceRecommendation.text = getString(R.string.label_distance_recommendation)
         
         // Setup buttons
         btnStartPause.setOnClickListener {
@@ -223,9 +229,12 @@ class MainActivity : AppCompatActivity() {
     
     private fun refreshAllText() {
         tvAppTitle.text = getString(R.string.app_name)
+        tvDistanceLabel.text = getString(R.string.label_realtime_distance)
+        tvDistanceRecommendation.text = getString(R.string.label_distance_recommendation)
         updateLangButtonText()
         btnStartPause.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
         btnCalibrate.text = getString(R.string.btn_calibrate)
+        btnFeedbackTip.text = getString(R.string.btn_feedback_tip)
         tvDistance.text = "--"
     }
 

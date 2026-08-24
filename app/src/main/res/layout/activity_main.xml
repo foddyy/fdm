@@ -64,6 +64,7 @@
                 android:textColor="#319795" />
 
             <TextView
+                android:id="@+id/tv_distance_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|start"
@@ -73,6 +74,7 @@
                 android:textColor="#718096" />
 
             <TextView
+                android:id="@+id/tv_distance_recommendation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
@@ -93,7 +95,7 @@
             <Button
                 android:id="@+id/btn_start_pause"
                 android:layout_width="0dp"
-                android:layout_height="72dp"
+                android:layout_height="52dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:text="开始监控"
@@ -106,7 +108,7 @@
             <Button
                 android:id="@+id/btn_calibrate"
                 android:layout_width="0dp"
-                android:layout_height="72dp"
+                android:layout_height="52dp"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:text="校准"
@@ -122,7 +124,7 @@
         <Button
             android:id="@+id/btn_feedback_tip"
             android:layout_width="wrap_content"
-            android:layout_height="72dp"
+            android:layout_height="52dp"
             android:layout_gravity="end"
             android:text="反馈/打赏"
             android:textSize="14sp"

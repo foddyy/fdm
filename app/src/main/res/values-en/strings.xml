@@ -18,6 +18,8 @@
     <string name="status_alert">⚠️ Too Close!</string>
     <string name="distance_info">%d cm</string>
     <string name="threshold_info">Threshold: 35 cm</string>
+    <string name="label_realtime_distance">Real-time Distance</string>
+    <string name="label_distance_recommendation">Recommended: 35cm, min 30cm</string>
 
     <!-- Alert overlay -->
     <string name="alert_overlay_title_en">You\u0027re Too Close!</string>

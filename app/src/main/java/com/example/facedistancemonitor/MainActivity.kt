@@ -317,11 +317,11 @@ class MainActivity : AppCompatActivity() {
         if (isRunning) {
             btnStartPause.text = getString(R.string.btn_stop_monitor)
             btnStartPause.setBackgroundResource(R.drawable.btn_background_dark)
-            btnStartPause.setTextColor resources.getColor(R.color.white, null)
+            btnStartPause.setTextColor(resources.getColor(R.color.white, null))
         } else {
             btnStartPause.text = getString(R.string.btn_start_monitor)
             btnStartPause.setBackgroundResource(R.drawable.btn_background_light)
-            btnStartPause.setTextColor resources.getColor(R.color.teal_700, null)
+            btnStartPause.setTextColor(resources.getColor(R.color.teal_700, null))
         }
     }
     

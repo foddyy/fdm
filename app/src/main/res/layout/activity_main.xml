@@ -35,12 +35,12 @@
             <Button
                 android:id="@+id/btn_language"
                 android:layout_width="60dp"
-                android:layout_height="28dp"
+                android:layout_height="36dp"
                 android:text="EN"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="#319795"
-                android:background="@drawable/btn_background_light"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/btn_background_dark"
                 android:padding="0dp"
                 android:elevation="2dp" />
 
@@ -93,7 +93,7 @@
             <Button
                 android:id="@+id/btn_start_pause"
                 android:layout_width="0dp"
-                android:layout_height="52dp"
+                android:layout_height="48dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:text="开始监控"
@@ -101,27 +101,27 @@
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
                 android:background="@drawable/btn_background_dark"
-                android:elevation="4dp" />
+                android:elevation="2dp" />
 
             <Button
                 android:id="@+id/btn_calibrate"
                 android:layout_width="0dp"
-                android:layout_height="52dp"
+                android:layout_height="48dp"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:text="重新校准"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="#319795"
-                android:background="@drawable/btn_background_light"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/btn_background_dark"
                 android:elevation="2dp" />
 
         </LinearLayout>
 
-        <!-- Bottom button: feedback/tip (right aligned) -->
+        <!-- Bottom button: feedback/tip (right aligned at bottom) -->
         <Button
             android:id="@+id/btn_feedback_tip"
-            android:layout_width="180dp"
+            android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_gravity="end"
             android:text="反馈/打赏"

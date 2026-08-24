@@ -317,11 +317,11 @@ class MainActivity : AppCompatActivity() {
         if (isRunning) {
             btnStartPause.text = getString(R.string.btn_stop_monitor)
             btnStartPause.setBackgroundResource(R.drawable.btn_background_dark)
+            btnStartPause.setTextColor resources.getColor(R.color.white, null)
         } else {
             btnStartPause.text = getString(R.string.btn_start_monitor)
-            // 使用稍深的颜色表示停止状态
-            btnStartPause.setBackgroundResource(R.drawable.btn_background_dark)
-            btnStartPause.alpha = 0.85f
+            btnStartPause.setBackgroundResource(R.drawable.btn_background_light)
+            btnStartPause.setTextColor resources.getColor(R.color.teal_700, null)
         }
     }
     

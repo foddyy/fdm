@@ -20,7 +20,7 @@
     <string name="threshold_info">Threshold: 35 cm</string>
 
     <!-- Alert overlay -->
-    <string name="alert_overlay_title_en">You\u0027re Too Close!</string>
+    <string name="alert_overlay_title_en">You're Too Close!</string>
     <string name="alert_overlay_title_zh">你离手机太近了！</string>
     <string name="alert_overlay_subtitle"></string>
 
@@ -39,4 +39,7 @@
     <string name="perm_overlay_granted">Overlay permission granted</string>
     <string name="perm_overlay_required">Overlay permission needed for alerts</string>
     <string name="status_no_signal">No signal</string>
+    <string name="btn_feedback_tip">Feedback / Tip</string>
+    <string name="url_wechat_profile">https://mp.weixin.qq.com/mp/profile_ext?action=home&amp;__biz=MzYyMjQzOTczNw&amp;scene=124#wechat_redirect</string>
+    <string name="url_feedback_article">https://mp.weixin.qq.com/s/po-c1QrTt3FrRsNJlaZneA</string>
 </resources>

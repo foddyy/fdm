@@ -42,14 +42,9 @@
                 android:textStyle="bold"
                 android:textColor="#319795"
                 android:background="@drawable/btn_background_light"
-                android:backgroundTint="@null"
+                android:padding="0dp"
                 android:elevation="0dp"
-                android:stateListAnimator="@null"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:insetLeft="0dp"
-                android:insetRight="0dp"
-                android:theme="@style/NoBackgroundButton" />
+                android:stateListAnimator="@null" />
 
         </LinearLayout>
 
@@ -110,14 +105,9 @@
                 android:textStyle="bold"
                 android:textColor="#319795"
                 android:background="@drawable/btn_background_light"
-                android:backgroundTint="@null"
+                android:padding="0dp"
                 android:elevation="0dp"
-                android:stateListAnimator="@null"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:insetLeft="0dp"
-                android:insetRight="0dp"
-                android:theme="@style/NoBackgroundButton" />
+                android:stateListAnimator="@null" />
 
             <Button
                 android:id="@+id/btn_calibrate"
@@ -130,14 +120,9 @@
                 android:textStyle="bold"
                 android:textColor="#319795"
                 android:background="@drawable/btn_background_light"
-                android:backgroundTint="@null"
+                android:padding="0dp"
                 android:elevation="0dp"
-                android:stateListAnimator="@null"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:insetLeft="0dp"
-                android:insetRight="0dp"
-                android:theme="@style/NoBackgroundButton" />
+                android:stateListAnimator="@null" />
 
         </LinearLayout>
 
@@ -152,14 +137,9 @@
             android:textStyle="bold"
             android:textColor="#319795"
             android:background="@drawable/btn_background_light"
-            android:backgroundTint="@null"
+            android:padding="0dp"
             android:elevation="0dp"
             android:stateListAnimator="@null"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:insetLeft="0dp"
-            android:insetRight="0dp"
-            android:theme="@style/NoBackgroundButton"
             android:layout_marginBottom="32dp" />
 
     </LinearLayout>

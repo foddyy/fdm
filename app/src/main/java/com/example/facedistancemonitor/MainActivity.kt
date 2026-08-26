@@ -69,6 +69,15 @@ class MainActivity : AppCompatActivity() {
         
         setContentView(R.layout.activity_main)
         
+        tvAppTitle = findViewById(R.id.tv_app_title)
+        btnLanguage = findViewById(R.id.btn_language)
+        tvDistance = findViewById(R.id.tv_distance)
+        tvDistanceLabel = findViewById(R.id.tv_distance_label)
+        tvDistanceRecommendation = findViewById(R.id.tv_distance_recommendation)
+        btnStartPause = findViewById(R.id.btn_start_pause)
+        btnCalibrate = findViewById(R.id.btn_calibrate)
+        btnFeedbackTip = findViewById(R.id.btn_feedback_tip)
+        
         // 设置所有按钮的浅青色背景
         val lightBg = ContextCompat.getDrawable(this, R.drawable.btn_background_light)
         btnLanguage.setBackground(lightBg)
@@ -87,15 +96,6 @@ class MainActivity : AppCompatActivity() {
         btnStartPause.elevation = 0f
         btnCalibrate.elevation = 0f
         btnFeedbackTip.elevation = 0f
-        
-        tvAppTitle = findViewById(R.id.tv_app_title)
-        btnLanguage = findViewById(R.id.btn_language)
-        tvDistance = findViewById(R.id.tv_distance)
-        tvDistanceLabel = findViewById(R.id.tv_distance_label)
-        tvDistanceRecommendation = findViewById(R.id.tv_distance_recommendation)
-        btnStartPause = findViewById(R.id.btn_start_pause)
-        btnCalibrate = findViewById(R.id.btn_calibrate)
-        btnFeedbackTip = findViewById(R.id.btn_feedback_tip)
         
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())

@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         btnCalibrate.backgroundTintList = null
         btnFeedbackTip.backgroundTintList = null
         
-        // 移除阴影和内边距
+        // 移除阴影
         btnLanguage.elevation = 0f
         btnStartPause.elevation = 0f
         btnCalibrate.elevation = 0f
@@ -102,6 +102,15 @@ class MainActivity : AppCompatActivity() {
         btnStartPause.setPadding(0, 0, 0, 0)
         btnCalibrate.setPadding(0, 0, 0, 0)
         btnFeedbackTip.setPadding(0, 0, 0, 0)
+        
+        // 强制设置按钮高度，防止 Material 主题覆盖
+        val lpStart = btnStartPause.layoutParams
+        lpStart?.let { it.height = resources.getDimensionPixelSize(R.dimen.btn_height_large) }
+        btnStartPause.layoutParams = lpStart
+        
+        val lpCalibrate = btnCalibrate.layoutParams
+        lpCalibrate?.let { it.height = resources.getDimensionPixelSize(R.dimen.btn_height_large) }
+        btnCalibrate.layoutParams = lpCalibrate
         
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())

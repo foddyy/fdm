@@ -104,14 +104,14 @@ class MainActivity : AppCompatActivity() {
         btnFeedbackTip.setPadding(0, 0, 0, 0)
         
         // 强制设置按钮高度，防止 Material 主题覆盖
-        val lpStart = btnStartPause.layoutParams
-        lpStart?.let { it.height = resources.getDimensionPixelSize(R.dimen.btn_height_large) }
-        btnStartPause.layoutParams = lpStart
-        
-        val lpCalibrate = btnCalibrate.layoutParams
-        lpCalibrate?.let { it.height = resources.getDimensionPixelSize(R.dimen.btn_height_large) }
-        btnCalibrate.layoutParams = lpCalibrate
-        
+        fun setButtonHeight(btn: Button, heightDp: Int) {
+            val lp = btn.layoutParams ?: return
+            lp.height = resources.getDimensionPixelSize(heightDp)
+            btn.layoutParams = lp
+        }
+        setButtonHeight(btnStartPause, R.dimen.btn_height_large)
+        setButtonHeight(btnCalibrate, R.dimen.btn_height_large)
+
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())
         
@@ -205,6 +205,24 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         syncServiceStateToUI()
+        // 确保按钮高度不被 Material 主题改变
+        resetButtonHeights()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // 窗口获得/失去焦点时重置按钮高度
+        resetButtonHeights()
+    }
+
+    private fun resetButtonHeights() {
+        val lpStart = btnStartPause.layoutParams
+        lpStart?.let { it.height = resources.getDimensionPixelSize(R.dimen.btn_height_large) }
+        btnStartPause.layoutParams = lpStart
+
+        val lpCalibrate = btnCalibrate.layoutParams
+        lpCalibrate?.let { it.height = resources.getDimensionPixelSize(R.dimen.btn_height_large) }
+        btnCalibrate.layoutParams = lpCalibrate
     }
     
     /** 同步Service真实运行状态到UI */

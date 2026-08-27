@@ -91,11 +91,17 @@ class MainActivity : AppCompatActivity() {
         btnCalibrate.backgroundTintList = null
         btnFeedbackTip.backgroundTintList = null
         
-        // 移除阴影
+        // 移除阴影和内边距
         btnLanguage.elevation = 0f
         btnStartPause.elevation = 0f
         btnCalibrate.elevation = 0f
         btnFeedbackTip.elevation = 0f
+        
+        // 完全移除 Material Button 默认内边距
+        btnLanguage.setPadding(0, 0, 0, 0)
+        btnStartPause.setPadding(0, 0, 0, 0)
+        btnCalibrate.setPadding(0, 0, 0, 0)
+        btnFeedbackTip.setPadding(0, 0, 0, 0)
         
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())

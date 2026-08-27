@@ -109,7 +109,11 @@
             android:padding="0dp"
             android:elevation="0dp"
             android:stateListAnimator="@null"
-            android:minHeight="40dp" />
+            android:minHeight="40dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp" />
 
         <!-- Start/Pause button -->
         <Button

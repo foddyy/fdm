@@ -13,13 +13,19 @@ class FixedSizeButton @JvmOverloads constructor(
     defStyleAttr: Int = com.google.android.material.R.attr.materialButtonStyle
 ) : MaterialButton(context, attrs, defStyleAttr) {
     
-    override fun applyInsets(insets: android.graphics.Insets) {
-        // 不应用 Material Button 的默认 insets
-        // 这样可以防止按钮尺寸被 Material 主题改变
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        // 强制使用指定的高度，忽略 MeasureSpec
+        val lp = layoutParams
+        if (lp.height != LayoutParams.MATCH_PARENT && lp.height != LayoutParams.WRAP_CONTENT) {
+            val fixedHeight = lp.height
+            super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(fixedHeight, MeasureSpec.EXACTLY))
+        } else {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        }
     }
     
-    override fun setUseMaterialThemeColors(useMaterialThemeColors: Boolean) {
-        // 禁用 Material 主题颜色，防止 Material 改变按钮样式
-        super.setUseMaterialThemeColors(false)
+    override fun setPadding(left: Int, top: Int, right: Int, bottom: Int) {
+        // 强制使用 0 padding
+        super.setPadding(0, 0, 0, 0)
     }
 }

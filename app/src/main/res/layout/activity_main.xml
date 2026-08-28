@@ -33,7 +33,7 @@
                 android:textColor="#2D3748" />
 
         <!-- Language toggle button -->
-        <Button
+        <com.example.facedistancemonitor.FixedButton
             android:id="@+id/btn_language"
             android:layout_width="56dp"
             android:layout_height="48dp"
@@ -96,7 +96,7 @@
             android:orientation="horizontal"
             android:layout_marginBottom="16dp">
 
-            <Button
+            <com.example.facedistancemonitor.FixedButton
                 android:id="@+id/btn_start_pause"
                 android:layout_width="0dp"
                 android:layout_height="96dp"
@@ -112,7 +112,7 @@
                 android:stateListAnimator="@null"
                 android:minHeight="96dp" />
 
-            <Button
+            <com.example.facedistancemonitor.FixedButton
                 android:id="@+id/btn_calibrate"
                 android:layout_width="0dp"
                 android:layout_height="96dp"
@@ -137,7 +137,7 @@
             android:layout_weight="1" />
 
         <!-- Bottom button: feedback/tip (centered at bottom) -->
-        <Button
+        <com.example.facedistancemonitor.FixedButton
             android:id="@+id/btn_feedback_tip"
             android:layout_width="160dp"
             android:layout_height="48dp"

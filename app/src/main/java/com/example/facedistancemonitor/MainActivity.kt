@@ -128,14 +128,22 @@ class MainActivity : AppCompatActivity() {
             } else {
                 startMonitoring()
             }
+            // 点击后重置高度
+            resetButtonHeights()
         }
-        
+
         btnCalibrate.setOnClickListener {
             startActivity(Intent(this, CalibrationActivity::class.java))
+            // 点击后重置高度
+            resetButtonHeights()
         }
-        
+
+        btnLanguage.setOnClickListener { toggleLanguage() }
+
         btnFeedbackTip.setOnClickListener {
             openWeChatArticle(getString(R.string.url_feedback_article))
+            // 点击后重置高度
+            resetButtonHeights()
         }
         
         updateLangButtonText()
@@ -216,13 +224,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun resetButtonHeights() {
-        val lpStart = btnStartPause.layoutParams
-        lpStart?.let { it.height = resources.getDimensionPixelSize(R.dimen.btn_height_large) }
-        btnStartPause.layoutParams = lpStart
-
-        val lpCalibrate = btnCalibrate.layoutParams
-        lpCalibrate?.let { it.height = resources.getDimensionPixelSize(R.dimen.btn_height_large) }
-        btnCalibrate.layoutParams = lpCalibrate
+        // 使用 post 延迟执行，确保在所有布局完成后执行
+        btnStartPause.post {
+            val lp = btnStartPause.layoutParams
+            if (lp != null) {
+                lp.height = resources.getDimensionPixelSize(R.dimen.btn_height_large)
+                btnStartPause.layoutParams = lp
+            }
+        }
+        btnCalibrate.post {
+            val lp = btnCalibrate.layoutParams
+            if (lp != null) {
+                lp.height = resources.getDimensionPixelSize(R.dimen.btn_height_large)
+                btnCalibrate.layoutParams = lp
+            }
+        }
     }
     
     /** 同步Service真实运行状态到UI */

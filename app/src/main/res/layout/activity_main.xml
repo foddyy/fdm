@@ -34,12 +34,14 @@
                 android:id="@+id/btn_language"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
                 android:text="EN"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:textColor="#319795"
                 android:background="@drawable/btn_background_light"
-                android:elevation="0dp" />
+                android:elevation="0dp"
+                android:padding="0dp" />
 
         </LinearLayout>
 
@@ -100,7 +102,8 @@
                 android:textStyle="bold"
                 android:textColor="#319795"
                 android:background="@drawable/btn_background_light"
-                android:elevation="0dp" />
+                android:elevation="0dp"
+                android:padding="0dp" />
 
             <Button
                 android:id="@+id/btn_calibrate"
@@ -113,7 +116,8 @@
                 android:textStyle="bold"
                 android:textColor="#319795"
                 android:background="@drawable/btn_background_light"
-                android:elevation="0dp" />
+                android:elevation="0dp"
+                android:padding="0dp" />
 
         </LinearLayout>
 
@@ -135,7 +139,8 @@
             android:textStyle="bold"
             android:textColor="#319795"
             android:background="@drawable/btn_background_light"
-            android:elevation="0dp" />
+            android:elevation="0dp"
+            android:padding="0dp" />
 
     </LinearLayout>
 

@@ -85,6 +85,12 @@ class MainActivity : AppCompatActivity() {
         btnCalibrate.setBackground(lightBg)
         btnFeedbackTip.setBackground(lightBg)
         
+        // 移除 Material Button 默认 tint（防止背景色变深）
+        btnLanguage.backgroundTintList = null
+        btnStartPause.backgroundTintList = null
+        btnCalibrate.backgroundTintList = null
+        btnFeedbackTip.backgroundTintList = null
+        
         // 移除阴影
         btnLanguage.elevation = 0f
         btnStartPause.elevation = 0f

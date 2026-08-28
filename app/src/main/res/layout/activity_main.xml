@@ -40,7 +40,10 @@
                 android:textColor="#319795"
                 android:background="@drawable/btn_background_light"
                 android:elevation="0dp"
-                android:padding="0dp" />
+                android:paddingStart="8dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp" />
 
         </LinearLayout>
 

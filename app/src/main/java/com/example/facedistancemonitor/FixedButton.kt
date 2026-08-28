@@ -2,6 +2,7 @@ package com.example.facedistancemonitor
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.ViewGroup
 import com.google.android.material.button.MaterialButton
 
 /**
@@ -15,9 +16,9 @@ class FixedButton @JvmOverloads constructor(
     
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val lp = layoutParams
-        if (lp != null && lp.height > 0 && lp.height != LayoutParams.WRAP_CONTENT && 
-            lp.height != LayoutParams.MATCH_PARENT) {
-            super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY))
+        if (lp != null && lp.height > 0 && lp.height != ViewGroup.LayoutParams.WRAP_CONTENT && 
+            lp.height != ViewGroup.LayoutParams.MATCH_PARENT) {
+            super.onMeasure(widthMeasureSpec, android.view.View.MeasureSpec.makeMeasureSpec(lp.height, android.view.View.MeasureSpec.EXACTLY))
         } else {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         }

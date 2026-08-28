@@ -85,32 +85,11 @@ class MainActivity : AppCompatActivity() {
         btnCalibrate.setBackground(lightBg)
         btnFeedbackTip.setBackground(lightBg)
         
-        // 移除 Material Button 默认 tint
-        btnLanguage.backgroundTintList = null
-        btnStartPause.backgroundTintList = null
-        btnCalibrate.backgroundTintList = null
-        btnFeedbackTip.backgroundTintList = null
-        
         // 移除阴影
         btnLanguage.elevation = 0f
         btnStartPause.elevation = 0f
         btnCalibrate.elevation = 0f
         btnFeedbackTip.elevation = 0f
-        
-        // 完全移除 Material Button 默认内边距
-        btnLanguage.setPadding(0, 0, 0, 0)
-        btnStartPause.setPadding(0, 0, 0, 0)
-        btnCalibrate.setPadding(0, 0, 0, 0)
-        btnFeedbackTip.setPadding(0, 0, 0, 0)
-        
-        // 强制设置按钮高度，防止 Material 主题覆盖
-        fun setButtonHeight(btn: Button, heightDp: Int) {
-            val lp = btn.layoutParams ?: return
-            lp.height = resources.getDimensionPixelSize(heightDp)
-            btn.layoutParams = lp
-        }
-        setButtonHeight(btnStartPause, R.dimen.btn_height_large)
-        setButtonHeight(btnCalibrate, R.dimen.btn_height_large)
 
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())
@@ -122,28 +101,19 @@ class MainActivity : AppCompatActivity() {
         tvDistanceRecommendation.text = getString(R.string.label_distance_recommendation)
         
         // Setup buttons
+        btnLanguage.setOnClickListener { toggleLanguage() }
         btnStartPause.setOnClickListener {
             if (serviceRunning) {
                 stopMonitoring()
             } else {
                 startMonitoring()
             }
-            // 点击后重置高度
-            resetButtonHeights()
         }
-
         btnCalibrate.setOnClickListener {
             startActivity(Intent(this, CalibrationActivity::class.java))
-            // 点击后重置高度
-            resetButtonHeights()
         }
-
-        btnLanguage.setOnClickListener { toggleLanguage() }
-
         btnFeedbackTip.setOnClickListener {
             openWeChatArticle(getString(R.string.url_feedback_article))
-            // 点击后重置高度
-            resetButtonHeights()
         }
         
         updateLangButtonText()
@@ -213,53 +183,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         syncServiceStateToUI()
-        // 确保按钮高度不被 Material 主题改变
-        resetButtonHeights()
-        // 注册全局布局监听器，确保按钮高度不被改变
-        setupButtonHeightObserver()
-    }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        // 窗口获得/失去焦点时重置按钮高度
-        resetButtonHeights()
-    }
-
-    private var heightObserver: android.view.ViewTreeObserver.OnGlobalLayoutListener? = null
-
-    private fun setupButtonHeightObserver() {
-        // 如果已存在监听器，先移除
-        heightObserver?.let {
-            btnStartPause.viewTreeObserver.removeOnGlobalLayoutListener(it)
-        }
-        
-        // 创建新的监听器
-        heightObserver = object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                resetButtonHeights()
-            }
-        }
-        
-        // 添加到按钮的 ViewTreeObserver
-        btnStartPause.viewTreeObserver.addOnGlobalLayoutListener(heightObserver!!)
-    }
-
-    private fun resetButtonHeights() {
-        // 使用 post 延迟执行，确保在所有布局完成后执行
-        btnStartPause.post {
-            val lp = btnStartPause.layoutParams
-            if (lp != null) {
-                lp.height = resources.getDimensionPixelSize(R.dimen.btn_height_large)
-                btnStartPause.layoutParams = lp
-            }
-        }
-        btnCalibrate.post {
-            val lp = btnCalibrate.layoutParams
-            if (lp != null) {
-                lp.height = resources.getDimensionPixelSize(R.dimen.btn_height_large)
-                btnCalibrate.layoutParams = lp
-            }
-        }
     }
     
     /** 同步Service真实运行状态到UI */
@@ -449,10 +372,5 @@ class MainActivity : AppCompatActivity() {
         distanceUpdateRunnable?.let { 
             distanceUpdateHandler.removeCallbacks(it)
         }
-        // 移除布局监听器
-        heightObserver?.let {
-            btnStartPause.viewTreeObserver.removeOnGlobalLayoutListener(it)
-        }
-        heightObserver = null
     }
 }

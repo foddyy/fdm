@@ -14,18 +14,14 @@ class FixedSizeButton @JvmOverloads constructor(
 ) : MaterialButton(context, attrs, defStyleAttr) {
     
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        // 强制使用指定的高度，忽略 MeasureSpec
+        // 获取布局参数中指定的高度
         val lp = layoutParams
-        if (lp.height != LayoutParams.MATCH_PARENT && lp.height != LayoutParams.WRAP_CONTENT) {
-            val fixedHeight = lp.height
-            super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(fixedHeight, MeasureSpec.EXACTLY))
+        if (lp != null && lp.height > 0 && lp.height != LayoutParams.WRAP_CONTENT && 
+            lp.height != LayoutParams.MATCH_PARENT) {
+            // 强制使用指定的高度
+            super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY))
         } else {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         }
-    }
-    
-    override fun setPadding(left: Int, top: Int, right: Int, bottom: Int) {
-        // 强制使用 0 padding
-        super.setPadding(0, 0, 0, 0)
     }
 }

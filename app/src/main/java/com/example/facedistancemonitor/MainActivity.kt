@@ -215,12 +215,33 @@ class MainActivity : AppCompatActivity() {
         syncServiceStateToUI()
         // 确保按钮高度不被 Material 主题改变
         resetButtonHeights()
+        // 注册全局布局监听器，确保按钮高度不被改变
+        setupButtonHeightObserver()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         // 窗口获得/失去焦点时重置按钮高度
         resetButtonHeights()
+    }
+
+    private var heightObserver: android.view.ViewTreeObserver.OnGlobalLayoutListener? = null
+
+    private fun setupButtonHeightObserver() {
+        // 如果已存在监听器，先移除
+        heightObserver?.let {
+            btnStartPause.viewTreeObserver.removeOnGlobalLayoutListener(it)
+        }
+        
+        // 创建新的监听器
+        heightObserver = object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                resetButtonHeights()
+            }
+        }
+        
+        // 添加到按钮的 ViewTreeObserver
+        btnStartPause.viewTreeObserver.addOnGlobalLayoutListener(heightObserver!!)
     }
 
     private fun resetButtonHeights() {
@@ -428,5 +449,10 @@ class MainActivity : AppCompatActivity() {
         distanceUpdateRunnable?.let { 
             distanceUpdateHandler.removeCallbacks(it)
         }
+        // 移除布局监听器
+        heightObserver?.let {
+            btnStartPause.viewTreeObserver.removeOnGlobalLayoutListener(it)
+        }
+        heightObserver = null
     }
 }

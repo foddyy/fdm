@@ -10,7 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.View
-import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,13 +26,13 @@ class MainActivity : AppCompatActivity() {
     private var serviceRunning = false
     
     private lateinit var tvAppTitle: TextView
-    private lateinit var btnLanguage: Button
+    private lateinit var btnLanguage: LinearLayout
     private lateinit var tvDistance: TextView
     private lateinit var tvDistanceLabel: TextView
     private lateinit var tvDistanceRecommendation: TextView
-    private lateinit var btnStartPause: Button
-    private lateinit var btnCalibrate: Button
-    private lateinit var btnFeedbackTip: Button
+    private lateinit var btnStartPause: LinearLayout
+    private lateinit var btnCalibrate: LinearLayout
+    private lateinit var btnFeedbackTip: LinearLayout
 
     companion object {
         const val REQUEST_CODE_PERMISSIONS = 100
@@ -84,24 +84,6 @@ class MainActivity : AppCompatActivity() {
         btnStartPause.setBackground(lightBg)
         btnCalibrate.setBackground(lightBg)
         btnFeedbackTip.setBackground(lightBg)
-        
-        // 移除 Material Button 默认 tint（防止背景色变深）
-        btnLanguage.backgroundTintList = null
-        btnStartPause.backgroundTintList = null
-        btnCalibrate.backgroundTintList = null
-        btnFeedbackTip.backgroundTintList = null
-        
-        // 移除阴影
-        btnLanguage.elevation = 0f
-        btnStartPause.elevation = 0f
-        btnCalibrate.elevation = 0f
-        btnFeedbackTip.elevation = 0f
-        
-        // 强制设置内边距为 0（防止 Material 主题动态改变）
-        btnLanguage.setPadding(6, 0, 8, 0)
-        btnStartPause.setPadding(0, 0, 0, 0)
-        btnCalibrate.setPadding(0, 0, 0, 0)
-        btnFeedbackTip.setPadding(0, 0, 0, 0)
 
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())

@@ -96,6 +96,12 @@ class MainActivity : AppCompatActivity() {
         btnStartPause.elevation = 0f
         btnCalibrate.elevation = 0f
         btnFeedbackTip.elevation = 0f
+        
+        // 强制设置内边距为 0（防止 Material 主题动态改变）
+        btnLanguage.setPadding(6, 0, 8, 0)
+        btnStartPause.setPadding(0, 0, 0, 0)
+        btnCalibrate.setPadding(0, 0, 0, 0)
+        btnFeedbackTip.setPadding(0, 0, 0, 0)
 
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())

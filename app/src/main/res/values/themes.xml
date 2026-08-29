@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.FaceDistanceMonitor" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/accent_blue</item>
@@ -5,5 +6,14 @@
         <item name="colorOnPrimary">@color/white</item>
         <item name="android:statusBarColor">@color/bg_dark</item>
         <item name="android:windowBackground">@color/bg_dark</item>
+        <!-- 禁用 Material Button 动态内边距 -->
+        <item name="materialButtonStyle">@style/NoInsetButton</item>
+    </style>
+    
+    <style name="NoInsetButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="android:insetRight">0dp</item>
     </style>
 </resources>

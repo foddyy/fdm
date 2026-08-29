@@ -34,7 +34,6 @@
                 android:id="@+id/btn_language"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:layout_marginEnd="4dp"
                 android:text="EN"
                 android:textSize="12sp"
                 android:textStyle="bold"
@@ -42,8 +41,8 @@
                 android:background="@drawable/btn_background_light"
                 android:elevation="0dp"
                 android:stateListAnimator="@null"
-                android:paddingStart="8dp"
-                android:paddingEnd="6dp"
+                android:paddingStart="6dp"
+                android:paddingEnd="8dp"
                 android:paddingTop="0dp"
                 android:paddingBottom="0dp" />
 

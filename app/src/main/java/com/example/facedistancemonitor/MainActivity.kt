@@ -27,12 +27,16 @@ class MainActivity : AppCompatActivity() {
     
     private lateinit var tvAppTitle: TextView
     private lateinit var btnLanguage: LinearLayout
+    private lateinit var tvLanguageBtn: TextView
     private lateinit var tvDistance: TextView
     private lateinit var tvDistanceLabel: TextView
     private lateinit var tvDistanceRecommendation: TextView
     private lateinit var btnStartPause: LinearLayout
+    private lateinit var tvStartPauseBtn: TextView
     private lateinit var btnCalibrate: LinearLayout
+    private lateinit var tvCalibrateBtn: TextView
     private lateinit var btnFeedbackTip: LinearLayout
+    private lateinit var tvFeedbackBtn: TextView
 
     companion object {
         const val REQUEST_CODE_PERMISSIONS = 100
@@ -71,12 +75,16 @@ class MainActivity : AppCompatActivity() {
         
         tvAppTitle = findViewById(R.id.tv_app_title)
         btnLanguage = findViewById(R.id.btn_language)
+        tvLanguageBtn = findViewById(R.id.tv_language_btn)
         tvDistance = findViewById(R.id.tv_distance)
         tvDistanceLabel = findViewById(R.id.tv_distance_label)
         tvDistanceRecommendation = findViewById(R.id.tv_distance_recommendation)
         btnStartPause = findViewById(R.id.btn_start_pause)
+        tvStartPauseBtn = findViewById(R.id.tv_start_pause_btn)
         btnCalibrate = findViewById(R.id.btn_calibrate)
+        tvCalibrateBtn = findViewById(R.id.tv_calibrate_btn)
         btnFeedbackTip = findViewById(R.id.btn_feedback_tip)
+        tvFeedbackBtn = findViewById(R.id.tv_feedback_btn)
         
         // 设置所有按钮的浅青色背景
         val lightBg = ContextCompat.getDrawable(this, R.drawable.btn_background_light)
@@ -196,7 +204,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateLangButtonText() {
-        btnLanguage.text = if (localeIsChinese()) "EN" else "中文"
+        tvLanguageBtn.text = if (localeIsChinese()) "EN" else "中文"
     }
 
     private fun toggleLanguage() {
@@ -238,9 +246,9 @@ class MainActivity : AppCompatActivity() {
         tvDistanceLabel.text = getString(R.string.label_realtime_distance)
         tvDistanceRecommendation.text = getString(R.string.label_distance_recommendation)
         updateLangButtonText()
-        btnStartPause.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
-        btnCalibrate.text = getString(R.string.btn_calibrate)
-        btnFeedbackTip.text = getString(R.string.btn_feedback_tip)
+        tvStartPauseBtn.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
+        tvCalibrateBtn.text = getString(R.string.btn_calibrate)
+        tvFeedbackBtn.text = getString(R.string.btn_feedback_tip)
         tvDistance.text = "--"
     }
 
@@ -321,9 +329,8 @@ class MainActivity : AppCompatActivity() {
     
     private fun updateStartPauseButton(isRunning: Boolean) {
         // 所有按钮统一使用浅色背景
-        btnStartPause.text = if (isRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
+        tvStartPauseBtn.text = if (isRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
         btnStartPause.setBackgroundResource(R.drawable.btn_background_light)
-        btnStartPause.setTextColor(resources.getColor(R.color.teal_700, null))
     }
     
     private fun startDistanceUpdates() {

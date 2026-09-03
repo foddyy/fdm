@@ -69,26 +69,23 @@
         </FrameLayout>
 
         <!-- Feedback button -->
-        <LinearLayout
+        <com.example.facedistancemonitor.FixedSizeButton
             android:id="@+id/btn_feedback_tip"
             android:layout_width="140dp"
             android:layout_height="40dp"
             android:layout_gravity="center_horizontal"
+            android:text="反馈/打赏"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#319795"
             android:background="@drawable/btn_background_light"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true">
-
-            <TextView
-                android:id="@+id/tv_feedback_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="反馈/打赏"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textColor="#319795" />
-
-        </LinearLayout>
+            android:padding="0dp"
+            android:elevation="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:minHeight="40dp" />
 
     </LinearLayout>
 
@@ -101,74 +98,64 @@
         android:padding="8dp">
 
         <!-- Language toggle -->
-        <LinearLayout
+        <com.example.facedistancemonitor.FixedSizeButton
             android:id="@+id/btn_language"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:text="EN"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#319795"
             android:background="@drawable/btn_background_light"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true"
             android:paddingStart="6dp"
-            android:paddingEnd="8dp">
-
-            <TextView
-                android:id="@+id/tv_language_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="EN"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textColor="#319795" />
-
-        </LinearLayout>
+            android:paddingEnd="8dp"
+            android:elevation="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:minHeight="48dp" />
 
         <!-- Start/Pause button -->
-        <LinearLayout
+        <com.example.facedistancemonitor.FixedSizeButton
             android:id="@+id/btn_start_pause"
             android:layout_width="120dp"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="8dp"
+            android:text="开始监控"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#319795"
             android:background="@drawable/btn_background_light"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true">
-
-            <TextView
-                android:id="@+id/tv_start_pause_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="开始监控"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="#319795" />
-
-        </LinearLayout>
+            android:padding="0dp"
+            android:elevation="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:minHeight="120dp" />
 
         <!-- Calibrate button -->
-        <LinearLayout
+        <com.example.facedistancemonitor.FixedSizeButton
             android:id="@+id/btn_calibrate"
             android:layout_width="120dp"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_marginTop="8dp"
+            android:text="校准"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#319795"
             android:background="@drawable/btn_background_light"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true">
-
-            <TextView
-                android:id="@+id/tv_calibrate_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="校准"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="#319795" />
-
-        </LinearLayout>
+            android:padding="0dp"
+            android:elevation="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:minHeight="120dp" />
 
     </LinearLayout>
 

@@ -10,7 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.View
-import android.widget.LinearLayout
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,16 +26,16 @@ class MainActivity : AppCompatActivity() {
     private var serviceRunning = false
     
     private lateinit var tvAppTitle: TextView
-    private lateinit var btnLanguage: LinearLayout
+    private lateinit var btnLanguage: Button
     private lateinit var tvLanguageBtn: TextView
     private lateinit var tvDistance: TextView
     private lateinit var tvDistanceLabel: TextView
     private lateinit var tvDistanceRecommendation: TextView
-    private lateinit var btnStartPause: LinearLayout
+    private lateinit var btnStartPause: Button
     private lateinit var tvStartPauseBtn: TextView
-    private lateinit var btnCalibrate: LinearLayout
+    private lateinit var btnCalibrate: Button
     private lateinit var tvCalibrateBtn: TextView
-    private lateinit var btnFeedbackTip: LinearLayout
+    private lateinit var btnFeedbackTip: Button
     private lateinit var tvFeedbackBtn: TextView
 
     companion object {
@@ -95,11 +95,6 @@ class MainActivity : AppCompatActivity() {
 
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())
-        
-        // 保存按钮的初始尺寸，防止被系统改变
-        saveButtonSizes()
-        // 启动尺寸监听器
-        startSizeMonitor()
         
         // Setup UI
         tvAppTitle.text = getString(R.string.app_name)
@@ -339,136 +334,9 @@ class MainActivity : AppCompatActivity() {
         btnStartPause.setBackgroundResource(R.drawable.btn_background_light)
     }
     
-    // 全局布局监听器 - 持续修复按钮尺寸
-    private lateinit var globalLayoutListener: android.view.ViewTreeObserver.OnGlobalLayoutListener
-
-    // 保存按钮的初始尺寸
-    private fun saveButtonSizes() {
-        // 使用 ViewTreeObserver 确保布局完成后再保存尺寸
-        val observer = btnLanguage.viewTreeObserver
-        observer.addOnGlobalLayoutListener(object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                btnLanguage.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                // 保存初始尺寸到 SharedPreferences
-                val prefs = getSharedPreferences("button_sizes", MODE_PRIVATE).edit()
-                prefs.putInt("lang_width", btnLanguage.layoutParams.width)
-                prefs.putInt("lang_height", btnLanguage.layoutParams.height)
-                prefs.putInt("start_width", btnStartPause.layoutParams.width)
-                prefs.putInt("start_height", btnStartPause.layoutParams.height)
-                prefs.putInt("cal_width", btnCalibrate.layoutParams.width)
-                prefs.putInt("cal_height", btnCalibrate.layoutParams.height)
-                prefs.putInt("feedback_width", btnFeedbackTip.layoutParams.width)
-                prefs.putInt("feedback_height", btnFeedbackTip.layoutParams.height)
-                prefs.apply()
-                android.util.Log.d("MainActivity", "保存按钮尺寸: 语言=${btnLanguage.layoutParams.width}x${btnLanguage.layoutParams.height}, 开始=${btnStartPause.layoutParams.width}x${btnStartPause.layoutParams.height}")
-            }
-        })
-    }
-    
-    // 启动全局布局监听，持续修复按钮尺寸
-    private fun startSizeMonitor() {
-        globalLayoutListener = object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
-            private var lastLangWidth = -1
-            private var lastLangHeight = -1
-            private var lastStartHeight = -1
-            private var lastCalHeight = -1
-            
-            override fun onGlobalLayout() {
-                val currentLangWidth = btnLanguage.layoutParams.width
-                val currentLangHeight = btnLanguage.layoutParams.height
-                val currentStartHeight = btnStartPause.layoutParams.height
-                val currentCalHeight = btnCalibrate.layoutParams.height
-                
-                // 检查是否有尺寸变化
-                var changed = false
-                if (lastLangWidth >= 0 && currentLangWidth != lastLangWidth) {
-                    val lp = btnLanguage.layoutParams
-                    lp.width = lastLangWidth
-                    btnLanguage.layoutParams = lp
-                    changed = true
-                }
-                if (lastLangHeight >= 0 && currentLangHeight != lastLangHeight) {
-                    val lp = btnLanguage.layoutParams
-                    lp.height = lastLangHeight
-                    btnLanguage.layoutParams = lp
-                    changed = true
-                }
-                if (lastStartHeight >= 0 && currentStartHeight != lastStartHeight) {
-                    val lp = btnStartPause.layoutParams
-                    lp.height = lastStartHeight
-                    btnStartPause.layoutParams = lp
-                    changed = true
-                }
-                if (lastCalHeight >= 0 && currentCalHeight != lastCalHeight) {
-                    val lp = btnCalibrate.layoutParams
-                    lp.height = lastCalHeight
-                    btnCalibrate.layoutParams = lp
-                    changed = true
-                }
-                
-                // 初始化记录值
-                if (lastLangWidth < 0) {
-                    lastLangWidth = currentLangWidth
-                    lastLangHeight = currentLangHeight
-                    lastStartHeight = currentStartHeight
-                    lastCalHeight = currentCalHeight
-                }
-                
-                if (changed) {
-                    android.util.Log.d("MainActivity", "检测到尺寸变化，已修复")
-                }
-            }
-        }
-        window.decorView.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
-    }
-    
-    // 恢复按钮尺寸（防止被系统改变）
-    private fun restoreButtonSizes() {
-        val prefs = getSharedPreferences("button_sizes", MODE_PRIVATE)
-        val langWidth = prefs.getInt("lang_width", -1)
-        val langHeight = prefs.getInt("lang_height", -1)
-        if (langWidth > 0 && langHeight > 0) {
-            val lp = btnLanguage.layoutParams
-            lp.width = langWidth
-            lp.height = langHeight
-            btnLanguage.layoutParams = lp
-        }
-        
-        val startWidth = prefs.getInt("start_width", -1)
-        val startHeight = prefs.getInt("start_height", -1)
-        if (startWidth > 0 && startHeight > 0) {
-            val lp = btnStartPause.layoutParams
-            lp.width = startWidth
-            lp.height = startHeight
-            btnStartPause.layoutParams = lp
-        }
-        
-        val calWidth = prefs.getInt("cal_width", -1)
-        val calHeight = prefs.getInt("cal_height", -1)
-        if (calWidth > 0 && calHeight > 0) {
-            val lp = btnCalibrate.layoutParams
-            lp.width = calWidth
-            lp.height = calHeight
-            btnCalibrate.layoutParams = lp
-        }
-        
-        val feedbackWidth = prefs.getInt("feedback_width", -1)
-        val feedbackHeight = prefs.getInt("feedback_height", -1)
-        if (feedbackWidth > 0 && feedbackHeight > 0) {
-            val lp = btnFeedbackTip.layoutParams
-            lp.width = feedbackWidth
-            lp.height = feedbackHeight
-            btnFeedbackTip.layoutParams = lp
-        }
-    }
-    
     override fun onResume() {
         super.onResume()
-        // 恢复按钮尺寸，防止切换应用后变化
-        restoreButtonSizes()
         syncServiceStateToUI()
-        // 调试日志：检查按钮尺寸
-        android.util.Log.d("MainActivity", "onResume - 按钮尺寸: 语言=${btnLanguage.layoutParams.width}x${btnLanguage.layoutParams.height}, 开始=${btnStartPause.layoutParams.width}x${btnStartPause.layoutParams.height}")
     }
     
     private fun startDistanceUpdates() {

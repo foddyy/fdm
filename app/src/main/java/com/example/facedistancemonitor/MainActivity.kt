@@ -27,16 +27,12 @@ class MainActivity : AppCompatActivity() {
     
     private lateinit var tvAppTitle: TextView
     private lateinit var btnLanguage: Button
-    private lateinit var tvLanguageBtn: TextView
     private lateinit var tvDistance: TextView
     private lateinit var tvDistanceLabel: TextView
     private lateinit var tvDistanceRecommendation: TextView
     private lateinit var btnStartPause: Button
-    private lateinit var tvStartPauseBtn: TextView
     private lateinit var btnCalibrate: Button
-    private lateinit var tvCalibrateBtn: TextView
     private lateinit var btnFeedbackTip: Button
-    private lateinit var tvFeedbackBtn: TextView
 
     companion object {
         const val REQUEST_CODE_PERMISSIONS = 100
@@ -54,18 +50,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val overlayPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (Settings.canDrawOverlays(this)) {
-                Toast.makeText(this, getString(R.string.perm_overlay_granted), Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, getString(R.string.perm_overlay_required), Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -75,24 +59,20 @@ class MainActivity : AppCompatActivity() {
         
         tvAppTitle = findViewById(R.id.tv_app_title)
         btnLanguage = findViewById(R.id.btn_language)
-        tvLanguageBtn = findViewById(R.id.tv_language_btn)
         tvDistance = findViewById(R.id.tv_distance)
         tvDistanceLabel = findViewById(R.id.tv_distance_label)
         tvDistanceRecommendation = findViewById(R.id.tv_distance_recommendation)
         btnStartPause = findViewById(R.id.btn_start_pause)
-        tvStartPauseBtn = findViewById(R.id.tv_start_pause_btn)
         btnCalibrate = findViewById(R.id.btn_calibrate)
-        tvCalibrateBtn = findViewById(R.id.tv_calibrate_btn)
         btnFeedbackTip = findViewById(R.id.btn_feedback_tip)
-        tvFeedbackBtn = findViewById(R.id.tv_feedback_btn)
         
         // 设置所有按钮的浅青色背景
         val lightBg = ContextCompat.getDrawable(this, R.drawable.btn_background_light)
-        btnLanguage.setBackground(lightBg)
-        btnStartPause.setBackground(lightBg)
-        btnCalibrate.setBackground(lightBg)
-        btnFeedbackTip.setBackground(lightBg)
-
+        btnLanguage.background = lightBg
+        btnStartPause.background = lightBg
+        btnCalibrate.background = lightBg
+        btnFeedbackTip.background = lightBg
+        
         distanceDataStore = DistanceDataStore(this)
         distanceUpdateHandler = Handler(Looper.getMainLooper())
         
@@ -103,12 +83,8 @@ class MainActivity : AppCompatActivity() {
         tvDistanceRecommendation.text = getString(R.string.label_distance_recommendation)
         
         // Setup buttons
-        btnLanguage.setOnClickListener {
-            restoreButtonSizes()
-            toggleLanguage()
-        }
+        btnLanguage.setOnClickListener { toggleLanguage() }
         btnStartPause.setOnClickListener {
-            restoreButtonSizes()
             if (serviceRunning) {
                 stopMonitoring()
             } else {
@@ -116,11 +92,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
         btnCalibrate.setOnClickListener {
-            restoreButtonSizes()
             startActivity(Intent(this, CalibrationActivity::class.java))
         }
         btnFeedbackTip.setOnClickListener {
-            restoreButtonSizes()
             openWeChatArticle(getString(R.string.url_feedback_article))
         }
         
@@ -149,46 +123,17 @@ class MainActivity : AppCompatActivity() {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
         } catch (e: Exception) {
-            // 微信未安装，用浏览器打开
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            // 如果微信不可用，用浏览器打开
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
         }
-    }
-    
-    private fun requestAllPermissions(onComplete: () -> Unit) {
-        if (hasAllPermissions()) {
-            onComplete()
-        } else {
-            _permissionCallback = onComplete
-            requestPermissions(getPermissionArray(), REQUEST_CODE_PERMISSIONS)
-        }
-    }
-    
-    private var _permissionCallback: (() -> Unit)? = null
-    
-    private fun getPermissionArray(): Array<String> {
-        val list = mutableListOf<String>()
-        list.add(Manifest.permission.CAMERA)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            list.add(Manifest.permission.POST_NOTIFICATIONS)
-        }
-        return list.toTypedArray()
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            _permissionCallback?.let { callback ->
-                _permissionCallback = null
-                callback()
-            }
-        }
+    override fun onResume() {
+        super.onResume()
+        syncServiceStateToUI()
     }
     
-    /** 同步Service真实运行状态到UI */
     private fun syncServiceStateToUI() {
         val lastFrame = distanceDataStore.getLastFrameTime()
         val cameraStatus = distanceDataStore.getCameraStatus()
@@ -205,7 +150,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateLangButtonText() {
-        tvLanguageBtn.text = if (localeIsChinese()) "EN" else "中文"
+        btnLanguage.text = if (localeIsChinese()) "EN" else "中文"
     }
 
     private fun toggleLanguage() {
@@ -247,9 +192,9 @@ class MainActivity : AppCompatActivity() {
         tvDistanceLabel.text = getString(R.string.label_realtime_distance)
         tvDistanceRecommendation.text = getString(R.string.label_distance_recommendation)
         updateLangButtonText()
-        tvStartPauseBtn.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
-        tvCalibrateBtn.text = getString(R.string.btn_calibrate)
-        tvFeedbackBtn.text = getString(R.string.btn_feedback_tip)
+        btnStartPause.text = if (serviceRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
+        btnCalibrate.text = getString(R.string.btn_calibrate)
+        btnFeedbackTip.text = getString(R.string.btn_feedback_tip)
         tvDistance.text = "--"
     }
 
@@ -268,57 +213,63 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestPermissions() {
-        val permissions = mutableListOf<String>()
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.CAMERA)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        permissionLauncher.launch(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                arrayOf(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                )
+            } else {
+                arrayOf(Manifest.permission.CAMERA)
             }
-        }
+        )
+    }
 
-        if (permissions.isNotEmpty()) {
-            permissionLauncher.launch(permissions.toTypedArray())
+    private fun requestAllPermissions(callback: () -> Unit) {
+        _permissionCallback = callback
+        if (hasAllPermissions()) {
+            _permissionCallback?.let { callback ->
+                _permissionCallback = null
+                callback()
+            }
+        } else {
+            requestPermissions()
         }
     }
 
-    private fun startMonitoring() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                val intent = Intent(
-                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:$packageName")
-                )
-                overlayPermissionLauncher.launch(intent)
-                return
+    private var _permissionCallback: (() -> Unit)? = null
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            _permissionCallback?.let { callback ->
+                _permissionCallback = null
+                callback()
             }
         }
-
+    }
+    
+    private fun startMonitoring() {
         val intent = Intent(this, DistanceMonitorService::class.java).apply {
             action = "ACTION_START_MONITORING"
         }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
-        }
-
+        startService(intent)
+        
         serviceRunning = true
         updateStartPauseButton(true)
+        startDistanceUpdates()
     }
-
+    
     private fun stopMonitoring() {
         val intent = Intent(this, DistanceMonitorService::class.java).apply {
             action = "ACTION_STOP_MONITORING"
         }
         startService(intent)
-
+        
         serviceRunning = false
         updateStartPauseButton(false)
         
@@ -329,14 +280,7 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun updateStartPauseButton(isRunning: Boolean) {
-        // 所有按钮统一使用浅色背景
-        tvStartPauseBtn.text = if (isRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
-        btnStartPause.setBackgroundResource(R.drawable.btn_background_light)
-    }
-    
-    override fun onResume() {
-        super.onResume()
-        syncServiceStateToUI()
+        btnStartPause.text = if (isRunning) getString(R.string.btn_stop_monitor) else getString(R.string.btn_start_monitor)
     }
     
     private fun startDistanceUpdates() {
@@ -378,10 +322,6 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         distanceUpdateRunnable?.let { 
             distanceUpdateHandler.removeCallbacks(it)
-        }
-        // 移除全局布局监听器
-        if (::globalLayoutListener.isInitialized) {
-            window.decorView.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
         }
     }
 }

@@ -106,8 +106,12 @@ class MainActivity : AppCompatActivity() {
         tvDistanceRecommendation.text = getString(R.string.label_distance_recommendation)
         
         // Setup buttons
-        btnLanguage.setOnClickListener { toggleLanguage() }
+        btnLanguage.setOnClickListener {
+            restoreButtonSizes()
+            toggleLanguage()
+        }
         btnStartPause.setOnClickListener {
+            restoreButtonSizes()
             if (serviceRunning) {
                 stopMonitoring()
             } else {
@@ -115,9 +119,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
         btnCalibrate.setOnClickListener {
+            restoreButtonSizes()
             startActivity(Intent(this, CalibrationActivity::class.java))
         }
         btnFeedbackTip.setOnClickListener {
+            restoreButtonSizes()
             openWeChatArticle(getString(R.string.url_feedback_article))
         }
         
@@ -349,6 +355,7 @@ class MainActivity : AppCompatActivity() {
                 prefs.putInt("feedback_width", btnFeedbackTip.layoutParams.width)
                 prefs.putInt("feedback_height", btnFeedbackTip.layoutParams.height)
                 prefs.apply()
+                android.util.Log.d("MainActivity", "保存按钮尺寸: 语言=${btnLanguage.layoutParams.width}x${btnLanguage.layoutParams.height}, 开始=${btnStartPause.layoutParams.width}x${btnStartPause.layoutParams.height}")
             }
         })
     }
@@ -398,6 +405,8 @@ class MainActivity : AppCompatActivity() {
         // 恢复按钮尺寸，防止切换应用后变化
         restoreButtonSizes()
         syncServiceStateToUI()
+        // 调试日志：检查按钮尺寸
+        android.util.Log.d("MainActivity", "onResume - 按钮尺寸: 语言=${btnLanguage.layoutParams.width}x${btnLanguage.layoutParams.height}, 开始=${btnStartPause.layoutParams.width}x${btnStartPause.layoutParams.height}")
     }
     
     private fun startDistanceUpdates() {

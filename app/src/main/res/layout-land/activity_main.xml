@@ -107,10 +107,10 @@
             android:layout_height="48dp"
             android:background="@drawable/btn_background_light"
             android:gravity="center"
-            android:paddingStart="6dp"
-            android:paddingEnd="8dp"
             android:clickable="true"
-            android:focusable="true">
+            android:focusable="true"
+            android:paddingStart="6dp"
+            android:paddingEnd="8dp">
 
             <TextView
                 android:id="@+id/tv_language_btn"

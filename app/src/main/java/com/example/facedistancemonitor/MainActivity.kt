@@ -98,6 +98,8 @@ class MainActivity : AppCompatActivity() {
         
         // 保存按钮的初始尺寸，防止被系统改变
         saveButtonSizes()
+        // 启动尺寸监听器
+        startSizeMonitor()
         
         // Setup UI
         tvAppTitle.text = getString(R.string.app_name)
@@ -337,6 +339,9 @@ class MainActivity : AppCompatActivity() {
         btnStartPause.setBackgroundResource(R.drawable.btn_background_light)
     }
     
+    // 全局布局监听器 - 持续修复按钮尺寸
+    private lateinit var globalLayoutListener: android.view.ViewTreeObserver.OnGlobalLayoutListener
+
     // 保存按钮的初始尺寸
     private fun saveButtonSizes() {
         // 使用 ViewTreeObserver 确保布局完成后再保存尺寸
@@ -358,6 +363,63 @@ class MainActivity : AppCompatActivity() {
                 android.util.Log.d("MainActivity", "保存按钮尺寸: 语言=${btnLanguage.layoutParams.width}x${btnLanguage.layoutParams.height}, 开始=${btnStartPause.layoutParams.width}x${btnStartPause.layoutParams.height}")
             }
         })
+    }
+    
+    // 启动全局布局监听，持续修复按钮尺寸
+    private fun startSizeMonitor() {
+        globalLayoutListener = object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
+            private var lastLangWidth = -1
+            private var lastLangHeight = -1
+            private var lastStartHeight = -1
+            private var lastCalHeight = -1
+            
+            override fun onGlobalLayout() {
+                val currentLangWidth = btnLanguage.layoutParams.width
+                val currentLangHeight = btnLanguage.layoutParams.height
+                val currentStartHeight = btnStartPause.layoutParams.height
+                val currentCalHeight = btnCalibrate.layoutParams.height
+                
+                // 检查是否有尺寸变化
+                var changed = false
+                if (lastLangWidth >= 0 && currentLangWidth != lastLangWidth) {
+                    val lp = btnLanguage.layoutParams
+                    lp.width = lastLangWidth
+                    btnLanguage.layoutParams = lp
+                    changed = true
+                }
+                if (lastLangHeight >= 0 && currentLangHeight != lastLangHeight) {
+                    val lp = btnLanguage.layoutParams
+                    lp.height = lastLangHeight
+                    btnLanguage.layoutParams = lp
+                    changed = true
+                }
+                if (lastStartHeight >= 0 && currentStartHeight != lastStartHeight) {
+                    val lp = btnStartPause.layoutParams
+                    lp.height = lastStartHeight
+                    btnStartPause.layoutParams = lp
+                    changed = true
+                }
+                if (lastCalHeight >= 0 && currentCalHeight != lastCalHeight) {
+                    val lp = btnCalibrate.layoutParams
+                    lp.height = lastCalHeight
+                    btnCalibrate.layoutParams = lp
+                    changed = true
+                }
+                
+                // 初始化记录值
+                if (lastLangWidth < 0) {
+                    lastLangWidth = currentLangWidth
+                    lastLangHeight = currentLangHeight
+                    lastStartHeight = currentStartHeight
+                    lastCalHeight = currentCalHeight
+                }
+                
+                if (changed) {
+                    android.util.Log.d("MainActivity", "检测到尺寸变化，已修复")
+                }
+            }
+        }
+        window.decorView.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
     }
     
     // 恢复按钮尺寸（防止被系统改变）
@@ -448,6 +510,10 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         distanceUpdateRunnable?.let { 
             distanceUpdateHandler.removeCallbacks(it)
+        }
+        // 移除全局布局监听器
+        if (::globalLayoutListener.isInitialized) {
+            window.decorView.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
         }
     }
 }

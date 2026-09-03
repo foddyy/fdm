@@ -185,11 +185,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    override fun onResume() {
-        super.onResume()
-        syncServiceStateToUI()
-    }
-    
     /** 同步Service真实运行状态到UI */
     private fun syncServiceStateToUI() {
         val lastFrame = distanceDataStore.getLastFrameTime()

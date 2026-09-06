@@ -1,0 +1,15 @@
+# 图标文件位置
+
+## 本地图标
+- `app/src/main/res/mipmap-xxxhdpi/ic_launcher.png`
+- `icon_xxxhdpi.png` (仓库根目录)
+
+## 远程图标
+- `icon_remote.png` (仓库根目录)
+
+两个文件 MD5 完全一致: `b889cde0a4d2661e1cf5c6e0b677986f`
+
+## 图标内容
+- 盾牌: 浅青绿色 (#8BDEC0 等)
+- 眼睛: 白色眼白 + 深绿瞳孔
+- 背景: 透明

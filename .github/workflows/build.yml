@@ -25,8 +25,15 @@ jobs:
       - name: Clean build cache
         run: ./gradlew clean --no-daemon
 
+      - name: Invalidate Gradle caches
+        run: |
+          rm -rf ~/.gradle/caches
+          ./gradlew --stop
+
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --no-build-cache --console=plain
+        run: |
+          ./gradlew clean
+          ./gradlew assembleDebug --no-daemon --no-build-cache --refresh-dependencies --console=plain
 
       - name: Rename APK
         run: |

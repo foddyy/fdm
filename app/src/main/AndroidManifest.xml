@@ -26,6 +26,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FaceDistanceMonitor">
 
+        <!-- 禁用 Adaptive Icon，强制使用传统 PNG 图标 -->
+        <!-- 注意：这会在 Android 8.0+ 设备上禁用自适应图标特性 -->
+
         <!-- Main Activity (Calibration + Control) -->
         <activity
             android:name=".MainActivity"
